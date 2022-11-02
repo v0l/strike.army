@@ -13,7 +13,7 @@ namespace StrikeArmy.Controllers;
 [Route($"{PathBase}/{{user}}")]
 public class PayController : Controller
 {
-    private const string PathBase = "pay";
+    public const string PathBase = "pay";
 
     private readonly ILogger<PayController> _logger;
     private readonly StrikeApi.StrikeApi _api;
