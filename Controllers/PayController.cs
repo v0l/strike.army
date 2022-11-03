@@ -46,7 +46,7 @@ public class PayController : Controller
 
         var metadata = new List<string?[]>()
         {
-            new[] {"text/plain", description ?? string.Empty},
+            new[] {"text/plain", description ?? $"Pay to Strike user: {user}"},
             new[] {"text/identifier", $"{user}@{baseUrl.Host}"}
         };
 
