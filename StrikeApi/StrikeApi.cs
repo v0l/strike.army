@@ -49,19 +49,9 @@ public class StrikeApi
         return SendRequest<InvoiceQuote>(HttpMethod.Post, $"/v1/invoices/{id}/quote?descriptionHash={descriptionHash}");
     }
 
-    public Task<IEnumerable<WebhookSubscription>?> GetWebhookSubscriptions()
+    public Task<List<ConversionRate>?> GetRates()
     {
-        return SendRequest<IEnumerable<WebhookSubscription>>(HttpMethod.Get, "/v1/subscriptions");
-    }
-
-    public Task<WebhookSubscription?> CreateWebhook(NewWebhook hook)
-    {
-        return SendRequest<WebhookSubscription>(HttpMethod.Post, "/v1/subscriptions", hook);
-    }
-
-    public Task DeleteWebhook(Guid id)
-    {
-        return SendRequest<object>(HttpMethod.Delete, $"/v1/subscriptions/{id}");
+        return SendRequest<List<ConversionRate>>(HttpMethod.Get, "/v1/rates/ticker");
     }
 
     private async Task<TReturn?> SendRequest<TReturn>(HttpMethod method, string path, object? bodyObj = default)

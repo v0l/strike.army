@@ -21,7 +21,8 @@ public class PayController : Controller
     private readonly IMemoryCache _cache;
     private readonly HttpClient _httpClient;
 
-    public PayController(ILogger<PayController> logger, StrikeApi.StrikeApi api, StrikeArmyConfig config, IMemoryCache cache,
+    public PayController(ILogger<PayController> logger, StrikeApi.StrikeApi api, StrikeArmyConfig config,
+        IMemoryCache cache,
         HttpClient httpClient)
     {
         _logger = logger;
@@ -38,20 +39,10 @@ public class PayController : Controller
         var baseUrl = _config?.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
         var id = Guid.NewGuid();
 
-        string? avatar = null;
-        try
-        {
-            var profile = await _api.GetProfile(user);
-            if (!string.IsNullOrEmpty(profile?.AvatarUrl))
-            {
-                var imageData = await _httpClient.GetByteArrayAsync(profile.AvatarUrl);
-                avatar = Convert.ToBase64String(imageData);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load avatar");
-        }
+        var profile = await _api.GetProfile(user);
+        if (profile == null) return StatusCode(404);
+
+        var avatar = await getAvatar(profile);
 
         var metadata = new List<string?[]>()
         {
@@ -68,7 +59,7 @@ public class PayController : Controller
         {
             Callback = new Uri(baseUrl, $"{PathBase}/{user}/{id}"),
             MaxSendable = LightMoney.Satoshis(10_000_000),
-            MinSendable = LightMoney.Satoshis(1_000),
+            MinSendable = LightMoney.Satoshis(await getMinAmount(profile)),
             Metadata = JsonConvert.SerializeObject(metadata),
             CommentAllowed = 250,
             Tag = "payRequest"
@@ -136,5 +127,68 @@ public class PayController : Controller
                 Reason = ex.Message
             }));
         }
+    }
+
+    private async Task<string?> getAvatar(Profile? profile)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(profile?.AvatarUrl))
+            {
+                var imageData = await _httpClient.GetByteArrayAsync(profile.AvatarUrl);
+                return Convert.ToBase64String(imageData);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load avatar");
+        }
+
+        return null;
+    }
+
+    private async Task<long> getMinAmount(Profile? profile)
+    {
+        const long defaultMin = 1_000;
+        var currency = profile?.Currencies.FirstOrDefault(a => a.IsDefault)?.Currency ?? Currencies.USD;
+        var rates = await getRate(currency);
+        var minAmount = currency switch
+        {
+            Currencies.BTC => 1e-8m,
+            Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.01m,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        return rates != default ? (long) (minAmount / rates.Amount * 1e8m) : defaultMin;
+    }
+
+    private async ValueTask<ConversionRate?> getRate(Currencies toCurrency)
+    {
+        const string ratesKey = "rates";
+        var rates = _cache.Get<List<ConversionRate>>(ratesKey);
+        if (rates == default)
+        {
+            rates = await _api.GetRates();
+            _cache.Set(ratesKey, rates, TimeSpan.FromMinutes(10));
+        }
+
+        var rate = rates?.FirstOrDefault(a => a.Target == toCurrency && a.Source == Currencies.BTC);
+        if (rate != default)
+        {
+            return rate;
+        }
+
+        // look for opposite and invert amount
+        var rateInverted = rates?.FirstOrDefault(a => a.Source == toCurrency && a.Target == Currencies.BTC);
+        if (rateInverted != default)
+        {
+            return new()
+            {
+                Amount = 1 / rateInverted.Amount,
+                Source = rateInverted.Source,
+                Target = rateInverted.Target
+            };
+        }
+
+        return default;
     }
 }

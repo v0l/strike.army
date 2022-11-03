@@ -6,7 +6,7 @@ namespace StrikeArmy.StrikeApi;
 public class ConversionRate
 {
     [JsonProperty("amount")]
-    public string? Amount { get; init; }
+    public decimal Amount { get; init; }
     
     [JsonProperty("sourceCurrency")]
     [JsonConverter(typeof(StringEnumConverter))]
