@@ -159,7 +159,7 @@ public class PayController : Controller
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        return rates != default ? (long)Math.Ceiling(minAmount / rates.Amount * 1e8m) : defaultMin;
+        return rates != default ? 1 + (long)Math.Ceiling(minAmount / rates.Amount * 1e8m) : defaultMin;
     }
 
     private async ValueTask<ConversionRate?> getRate(Currencies toCurrency)
