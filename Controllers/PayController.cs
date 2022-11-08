@@ -158,7 +158,8 @@ public class PayController : Controller
             Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.01m,
             _ => throw new ArgumentOutOfRangeException()
         };
-        return rates != default ? (long) (minAmount / rates.Amount * 1e8m) : defaultMin;
+
+        return rates != default ? (long)Math.Ceiling(minAmount / rates.Amount * 1e8m) : defaultMin;
     }
 
     private async ValueTask<ConversionRate?> getRate(Currencies toCurrency)
