@@ -155,11 +155,11 @@ public class PayController : Controller
         var minAmount = currency switch
         {
             Currencies.BTC => 1e-8m,
-            Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.01m,
+            Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.05m,
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        return rates != default ? 1 + (long)Math.Ceiling(minAmount / rates.Amount * 1e8m) : defaultMin;
+        return rates != default ? (long)Math.Ceiling(minAmount / rates.Amount * 1e8m) : defaultMin;
     }
 
     private async ValueTask<ConversionRate?> getRate(Currencies toCurrency)
