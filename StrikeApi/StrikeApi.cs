@@ -54,6 +54,19 @@ public class StrikeApi
         return SendRequest<List<ConversionRate>>(HttpMethod.Get, "/v1/rates/ticker");
     }
 
+    public Task<QuotePayInvoiceResponse?> QuotePayInvoice(string invoice)
+    {
+        return SendRequest<QuotePayInvoiceResponse>(HttpMethod.Post, "/v1/payment-quotes/lightning", new
+        {
+            lnInvoice = invoice
+        });
+    }
+
+    public Task<ExecutePayInvoiceResponse?> ExecutePayInvoice(Guid id)
+    {
+        return SendRequest<ExecutePayInvoiceResponse>(HttpMethod.Patch, $"/v1/payment-quotes/{id}/execute");
+    }
+
     private async Task<TReturn?> SendRequest<TReturn>(HttpMethod method, string path, object? bodyObj = default)
         where TReturn : class
     {
@@ -65,14 +78,8 @@ public class StrikeApi
         }
 
         var rsp = await _client.SendAsync(request);
-        var okResponse = method.Method switch
-        {
-            "POST" => HttpStatusCode.Created,
-            _ => HttpStatusCode.OK
-        };
-
         var json = await rsp.Content.ReadAsStringAsync();
         _logger.LogInformation(json);
-        return rsp.StatusCode == okResponse ? JsonConvert.DeserializeObject<TReturn>(json) : default;
+        return rsp.IsSuccessStatusCode ? JsonConvert.DeserializeObject<TReturn>(json) : default;
     }
 }

@@ -1,7 +1,24 @@
 using System.Net;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using StrikeArmy;
 using StrikeArmy.Controllers;
 using StrikeArmy.StrikeApi;
+
+JsonSerializerSettings ConfigureJson(JsonSerializerSettings settings)
+{
+    settings.NullValueHandling = NullValueHandling.Ignore;
+    settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+    settings.Converters = new JsonConverter[]
+    {
+        new StringEnumConverter()
+    };
+
+    return settings;
+}
+
+JsonConvert.DefaultSettings = () => ConfigureJson(new());
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -15,6 +32,9 @@ services.AddHttpClient();
 services.AddMemoryCache();
 
 services.AddTransient<StrikeApi>();
+
+services.AddControllers()
+    .AddNewtonsoftJson(o => ConfigureJson(o.SerializerSettings));
 
 var app = builder.Build();
 

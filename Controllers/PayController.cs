@@ -66,7 +66,7 @@ public class PayController : Controller
         };
 
         _cache.Set(id, req, TimeSpan.FromMinutes(10));
-        return Content(JsonConvert.SerializeObject(req), "application/json");
+        return Json(req);
     }
 
     [HttpGet("{id:guid}")]
@@ -116,15 +116,15 @@ public class PayController : Controller
                 Pr = quote.LnInvoice
             };
 
-            return Content(JsonConvert.SerializeObject(rsp), "application/json");
+            return Json(rsp);
         }
         catch (Exception ex)
         {
-            return Content(JsonConvert.SerializeObject(new
+            return Json(new LNUrlStatusResponse
             {
                 Status = "ERROR",
                 Reason = ex.Message
-            }));
+            });
         }
     }
 
