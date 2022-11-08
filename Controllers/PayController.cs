@@ -102,7 +102,6 @@ public class PayController : Controller
                         .ToString(CultureInfo.InvariantCulture),
                     Currency = Currencies.BTC
                 },
-                CorrelationId = id.ToString(),
                 Description = comment ?? description ?? invoiceRequest.Metadata,
                 Handle = user
             });
