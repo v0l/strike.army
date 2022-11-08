@@ -154,7 +154,7 @@ public class PayController : Controller
         var minAmount = currency switch
         {
             Currencies.BTC => 1e-8m,
-            Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.05m,
+            Currencies.USD or Currencies.EUR or Currencies.GBP or Currencies.USDT => 0.01m,
             _ => throw new ArgumentOutOfRangeException()
         };
 
