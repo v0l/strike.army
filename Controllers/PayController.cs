@@ -72,7 +72,7 @@ public class PayController : Controller
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetInvoice([FromRoute] string user, [FromRoute] Guid id,
         [FromQuery] long amount,
-        [FromQuery] string? comment)
+        [FromQuery] string? comment = null)
     {
         try
         {
