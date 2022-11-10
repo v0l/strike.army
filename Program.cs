@@ -38,6 +38,7 @@ services.AddControllers()
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.UseRouting();
 app.UseEndpoints(ep =>
 {
