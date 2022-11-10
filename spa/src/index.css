@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+    background: black;
+    color: white;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+a {
+    color: inherit;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: 1px solid;
+    display: inline-block;
+    border-radius: 5px;
+    font-weight: bold;
+    user-select: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #333;
+}
+
+input[type="text"], input[type="number"], select {
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    border: 0;
+    margin-bottom: 10px;
+}
+
+input[type="checkbox"] {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
+}

@@ -2,13 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 
-#install npm
-#RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-#RUN apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y nodejs
 
-#run yarn install
-#COPY spa/package.json spa/yarn.lock spa/
-#RUN cd spa && npx yarn install
+COPY spa/package.json spa/yarn.lock spa/
+RUN cd spa && npx yarn install
 
 # Copy everything else and build
 COPY . .
