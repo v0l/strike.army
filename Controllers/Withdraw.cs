@@ -2,6 +2,7 @@ using BTCPayServer.Lightning;
 using LNURL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using NBitcoin;
 using StrikeArmy.StrikeApi;
 
 namespace StrikeArmy.Controllers;
@@ -74,6 +75,12 @@ public class Withdraw : Controller
             if (svc == default)
             {
                 throw new InvalidOperationException("K1 invalid");
+            }
+
+            var invoice = BOLT11PaymentRequest.Parse(pr, Network.Main); // todo: detect network
+            if (invoice.MinimumAmount < svc.MinWithdrawable || invoice.MinimumAmount > svc.MaxWithdrawable)
+            {
+                throw new Exception("Amount is out of range");
             }
 
             var quotePay = await _api.QuotePayInvoice(pr);
