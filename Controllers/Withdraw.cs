@@ -2,6 +2,7 @@ using BTCPayServer.Lightning;
 using LNURL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using StrikeArmy.StrikeApi;
 
 namespace StrikeArmy.Controllers;
 
@@ -12,33 +13,36 @@ public class Withdraw : Controller
     private readonly StrikeArmyConfig _config;
     private readonly StrikeApi.StrikeApi _api;
     private readonly IMemoryCache _cache;
+    private readonly ProfileExtension _profileExtension;
 
-    public Withdraw(StrikeArmyConfig config, StrikeApi.StrikeApi api, IMemoryCache cache)
+    public Withdraw(StrikeArmyConfig config, StrikeApi.StrikeApi api, IMemoryCache cache, ProfileExtension profileExtension)
     {
         _config = config;
         _api = api;
         _cache = cache;
+        _profileExtension = profileExtension;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetService([FromRoute] string user, [FromQuery] string? description = null,
         [FromQuery] Guid? secret = null)
     {
-        var baseUrl = _config?.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
+        var baseUrl = _config.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
         var id = Guid.NewGuid();
         try
         {
             var profile = await _api.GetProfile(user);
             if (profile == null) return StatusCode(404);
 
-            if (_config?.Secret != secret) return StatusCode(401);
+            if (_config.Secret != secret) return StatusCode(401);
 
-            var svc = new LNURLWithdrawRequest()
+            var amt = await _profileExtension.GetMinAmount(profile);
+            var svc = new LNURLWithdrawRequest
             {
                 Tag = "withdrawRequest",
                 Callback = new(baseUrl, $"/{WithdrawBase}/{user}/execute"),
-                MinWithdrawable = LightMoney.Satoshis(100),
-                MaxWithdrawable = LightMoney.Satoshis(1_000_000),
+                MinWithdrawable = LightMoney.Satoshis(amt),
+                MaxWithdrawable = LightMoney.Satoshis(amt),
                 K1 = id.ToString(),
                 DefaultDescription = description ?? "not used"
             };
