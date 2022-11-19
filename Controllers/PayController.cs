@@ -20,11 +20,11 @@ public class PayController : Controller
     private readonly StrikeArmyConfig _config;
     private readonly IMemoryCache _cache;
     private readonly HttpClient _httpClient;
-    private readonly ProfileExtension _profileExtension;
+    private readonly ProfileCache _profileExtension;
 
     public PayController(ILogger<PayController> logger, StrikeApi.StrikeApi api, StrikeArmyConfig config,
         IMemoryCache cache,
-        HttpClient httpClient, ProfileExtension profileExtension)
+        HttpClient httpClient, ProfileCache profileExtension)
     {
         _logger = logger;
         _api = api;

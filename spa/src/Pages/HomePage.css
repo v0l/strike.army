@@ -10,3 +10,7 @@
 .home-page h1 {
     text-align: center;
 }
+
+.home-page h3.error {
+    color: red;
+}

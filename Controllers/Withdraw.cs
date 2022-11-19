@@ -14,9 +14,9 @@ public class Withdraw : Controller
     private readonly StrikeArmyConfig _config;
     private readonly StrikeApi.StrikeApi _api;
     private readonly IMemoryCache _cache;
-    private readonly ProfileExtension _profileExtension;
+    private readonly ProfileCache _profileExtension;
 
-    public Withdraw(StrikeArmyConfig config, StrikeApi.StrikeApi api, IMemoryCache cache, ProfileExtension profileExtension)
+    public Withdraw(StrikeArmyConfig config, StrikeApi.StrikeApi api, IMemoryCache cache, ProfileCache profileExtension)
     {
         _config = config;
         _api = api;

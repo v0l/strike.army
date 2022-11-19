@@ -12,6 +12,7 @@ export default function StrikeArmyQR(props) {
                 data: props.link,
                 margin: 5,
                 type: 'canvas',
+                image: props.avatar,
                 qrOptions: {
                     mode: "Alphanumeric"
                 },
@@ -20,6 +21,9 @@ export default function StrikeArmyQR(props) {
                 },
                 cornersSquareOptions: {
                     type: 'extra-rounded'
+                },
+                imageOptions: {
+                    crossOrigin: "anonymous"
                 }
             });
             qrRef.current.innerHTML = "";

@@ -2,15 +2,31 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace StrikeArmy.StrikeApi;
 
-public class ProfileExtension
+public class ProfileCache
 {
     private readonly StrikeApi _api;
     private readonly IMemoryCache _cache;
 
-    public ProfileExtension(StrikeApi api, IMemoryCache cache)
+    public ProfileCache(StrikeApi api, IMemoryCache cache)
     {
         _api = api;
         _cache = cache;
+    }
+
+    public async Task<Profile?> GetProfile(string username)
+    {
+        var key = $"profile:{username}";
+        var profile = _cache.Get<Profile>(key);
+        if (profile == default)
+        {
+            profile = await _api.GetProfile(username);
+            if (profile != default)
+            {
+                _cache.Set(key, profile, TimeSpan.FromMinutes(10));
+            }
+        }
+
+        return profile;
     }
 
     /// <summary>

@@ -32,7 +32,7 @@ services.AddHttpClient();
 services.AddMemoryCache();
 
 services.AddTransient<StrikeApi>();
-services.AddTransient<ProfileExtension>();
+services.AddTransient<ProfileCache>();
 
 services.AddControllers()
     .AddNewtonsoftJson(o => ConfigureJson(o.SerializerSettings));

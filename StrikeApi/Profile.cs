@@ -8,7 +8,7 @@ public class Profile
     public string Handle { get; init; } = null;
     
     [JsonProperty("avatarUrl")]
-    public string? AvatarUrl { get; init; }
+    public string? AvatarUrl { get; set; }
     
     [JsonProperty("description")]
     public string? Description { get; init; }
