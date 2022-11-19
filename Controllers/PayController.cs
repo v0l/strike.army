@@ -90,6 +90,11 @@ public class PayController : Controller
                 throw new InvalidOperationException($"Cannot find request for invoice {id}");
             }
 
+            if (invoiceRequest.MinSendable.MilliSatoshi > amount || amount > invoiceRequest.MaxSendable.MilliSatoshi)
+            {
+                throw new InvalidOperationException("Amount is out of bounds");
+            }
+
             var metadata = JsonConvert.DeserializeObject<List<string[]>>(invoiceRequest.Metadata);
             // extract description from metadata
             var description = metadata?.FirstOrDefault(a =>
