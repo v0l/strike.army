@@ -19,7 +19,17 @@
     <ItemGroup>
         <PackageReference Include="LNURL" Version="0.0.24" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Database\Migrations" />
     </ItemGroup>
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
         <!-- Ensure Node.js is installed -->
