@@ -1,0 +1,10 @@
+version: "3.9"
+name: "strike.army"
+services:
+  postgres:
+    image: "postgres:14.1"
+    ports:
+      - "25432:5432"
+    environment:
+      - "POSTGRES_DB=strike-army"
+      - "POSTGRES_HOST_AUTH_METHOD=trust"

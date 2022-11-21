@@ -5,18 +5,20 @@ namespace StrikeArmy.StrikeApi;
 
 public class StrikeApi
 {
-    private readonly ILogger<StrikeApi> _logger;
     private readonly HttpClient _client;
 
-    public StrikeApi(StrikeApiSettings settings, ILogger<StrikeApi> logger)
+    public StrikeApi(StrikeApiSettings settings) : this(settings, settings.ApiKey!)
     {
-        _logger = logger;
+    }
+
+    public StrikeApi(StrikeApiSettings settings, string token)
+    {
         _client = new HttpClient
         {
             BaseAddress = settings.Uri ?? new Uri("https://api.strike.me/")
         };
 
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {settings.ApiKey}");
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
     }
 
     public Task<Invoice?> GenerateInvoice(CreateInvoiceRequest invoiceRequest)
@@ -36,6 +38,11 @@ public class StrikeApi
     public Task<Profile?> GetProfile(Guid id)
     {
         return SendRequest<Profile>(HttpMethod.Get, $"/v1/accounts/{id}/profile");
+    }
+
+    public Task<List<Balance>?> GetBalances()
+    {
+        return SendRequest<List<Balance>>(HttpMethod.Get, "/v1/balances");
     }
 
     public Task<Invoice?> GetInvoice(Guid id)
@@ -78,7 +85,7 @@ public class StrikeApi
 
         var rsp = await _client.SendAsync(request);
         var json = await rsp.Content.ReadAsStringAsync();
-        _logger.LogInformation(json);
+        Console.WriteLine(json);
         return rsp.IsSuccessStatusCode ? JsonConvert.DeserializeObject<TReturn>(json) : default;
     }
 }

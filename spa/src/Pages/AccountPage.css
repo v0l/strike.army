@@ -1,0 +1,39 @@
+.account-page {
+    width: 1024px;
+    padding: 20px;
+    border-radius: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid;
+}
+
+.account-page .balance {
+    display: flex;
+    border: 1px solid;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 20px;
+    line-height: 1.4em;
+    margin-bottom: 10px;
+    width: 200px;
+}
+
+.account-page .balance > div {
+    padding: 5px;
+    text-align: center;
+}
+
+.account-page .balance > div:first-child {
+    width: 50px;
+    font-weight: bold;
+    background-color: #222;
+}
+
+.account-page table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.account-page table tr {
+    background-color: #222;
+}

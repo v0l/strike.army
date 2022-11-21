@@ -25,6 +25,9 @@ public class AuthTokenConfiguration : IEntityTypeConfiguration<AuthToken>
         builder.Property(a => a.AccessToken)
             .IsRequired();
 
+        builder.Property(a => a.RefreshToken)
+            .IsRequired();
+
         builder.Property(a => a.Expires)
             .IsRequired();
 

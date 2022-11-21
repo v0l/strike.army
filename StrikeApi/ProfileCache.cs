@@ -29,6 +29,22 @@ public class ProfileCache
         return profile;
     }
 
+    public async Task<Profile?> GetProfile(Guid uid)
+    {
+        var key = $"profile:{uid}";
+        var profile = _cache.Get<Profile>(key);
+        if (profile == default)
+        {
+            profile = await _api.GetProfile(uid);
+            if (profile != default)
+            {
+                _cache.Set(key, profile, TimeSpan.FromMinutes(10));
+            }
+        }
+
+        return profile;
+    }
+
     /// <summary>
     /// Get min amount for send/receive in sats
     /// </summary>

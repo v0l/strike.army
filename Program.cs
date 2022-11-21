@@ -1,4 +1,4 @@
-using System.Net;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -24,7 +24,7 @@ public static class Program
         return settings;
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         JsonConvert.DefaultSettings = () => ConfigureJson(new());
 
@@ -39,19 +39,31 @@ public static class Program
         services.AddHttpClient();
         services.AddMemoryCache();
 
-        services.AddTransient<StrikeApi.StrikeApi>();
-        services.AddTransient<ProfileCache>();
+        services.AddStrikeApi();
         services.AddTransient<UserService>();
 
         services.AddControllers()
             .AddNewtonsoftJson(o => ConfigureJson(o.SerializerSettings));
 
         ConfigureDb(services, builder.Configuration);
+        services.AddHealthChecks();
 
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie();
+        services.AddAuthorization();
+        
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<StrikeArmyContext>();
+            await db.Database.MigrateAsync();
+        }
+        
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseEndpoints(ep =>
         {
             ep.Map("/.well-known/lnurlp/{username}", ctx =>
@@ -59,10 +71,6 @@ public static class Program
                 if (ctx.Request.RouteValues.TryGetValue("username", out var username))
                 {
                     ctx.Response.Redirect($"/{PayController.PathBase}/{username as string}", true);
-                }
-                else
-                {
-                    ctx.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 }
 
                 return Task.CompletedTask;
@@ -72,7 +80,7 @@ public static class Program
             ep.MapFallbackToFile("index.html");
         });
 
-        app.Run();
+        await app.RunAsync();
     }
 
     static void ConfigureDb(IServiceCollection services, IConfiguration configuration)
