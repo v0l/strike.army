@@ -134,21 +134,21 @@ public abstract class OAuthService
     public class OAuthAccessToken
     {
         [JsonProperty("access_token")]
-        public string AccessToken { get; init; }
+        public string AccessToken { get; init; } = null!;
 
         [JsonProperty("expires_in")]
         public int ExpiresIn { get; init; }
 
         [JsonProperty("token_type")]
-        public string TokenType { get; init; }
+        public string TokenType { get; init; } = null!;
 
         [JsonProperty("refresh_token")]
-        public string RefreshToken { get; init; }
+        public string RefreshToken { get; init; } = null!;
 
         [JsonProperty("scope")]
-        public string Scope { get; init; }
+        public string Scope { get; init; } = null!;
 
         [JsonProperty("id_token")]
-        public string IdToken { get; init; }
+        public string IdToken { get; init; } = null!;
     }
 }

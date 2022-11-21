@@ -36,7 +36,7 @@ public class UserController : Controller
     private async Task<User?> GetCurrentUser()
     {
         var uid = Request.HttpContext.GetUserId();
-        if (uid == default) return default;
+        if (!uid.HasValue) return default;
 
         return await _userService.GetUser(uid.Value);
     }

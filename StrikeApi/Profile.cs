@@ -5,7 +5,7 @@ namespace StrikeArmy.StrikeApi;
 public class Profile
 {
     [JsonProperty("handle")]
-    public string Handle { get; init; } = null;
+    public string Handle { get; init; } = null!;
     
     [JsonProperty("avatarUrl")]
     public string? AvatarUrl { get; set; }

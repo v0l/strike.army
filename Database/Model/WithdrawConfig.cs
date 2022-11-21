@@ -5,7 +5,7 @@ public class WithdrawConfig
     public Guid Id { get; init; }
     
     public Guid UserId { get; init; }
-    public User User { get; init; }
+    public User User { get; init; } = null!;
     
     public ulong? Min { get; init; }
     
