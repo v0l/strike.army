@@ -28,16 +28,20 @@ export default function AccountPage() {
 
         return (
             <StrikeModal close={() => setShowModal(false)}>
-                <NewWithdrawConfig/>
+                <NewWithdrawConfig close={async () => {
+                    await tryLoadAccount();
+                    setShowModal(false);
+                }}/>
             </StrikeModal>
         );
     }
 
     function renderWithdrawConfig(cfg) {
+        let usage = 1 - cfg.remaining / (cfg.type === "SingleUse" ? cfg.max : cfg.configReusable.limit);
         return <tr key={cfg.id}>
             <td>{cfg.id}</td>
             <td>{cfg.type}</td>
-            <td>0%</td>
+            <td>{(usage * 100).toFixed(0)}%</td>
             <td>
                 <div className="btn btn-small" onClick={() => setShowConfigQr(cfg)}>QR</div>
                 <div className="btn btn-small">Delete</div>
@@ -51,12 +55,14 @@ export default function AccountPage() {
         let link = `https://${window.location.host}/withdraw/${showConfigQr.id}`;
 
         let words = new TextEncoder().encode(link);
-        let lnurl = bech32.encode("lnurl", bech32.toWords(words), 10_000);
+        let lnurl = bech32.encode("lnurl", bech32.toWords(words), 10_000).toUpperCase();
 
         return (
             <StrikeModal close={() => setShowConfigQr(null)}>
-                <div className="qr-info">
-                    <StrikeArmyQR link={lnurl.toUpperCase()}/>
+                <div className="qr-info" onClick={e => e.stopPropagation()}>
+                    <StrikeArmyQR link={lnurl}/>
+                    <h3>LNURL Code</h3>
+                    <code>{lnurl}</code>
                 </div>
             </StrikeModal>
         );
@@ -88,7 +94,7 @@ export default function AccountPage() {
                 <table>
                     <thead>
                     <tr>
-                        <th>K1</th>
+                        <th>Id</th>
                         <th>Type</th>
                         <th>Usage</th>
                         <th>Actions</th>

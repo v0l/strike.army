@@ -169,7 +169,7 @@ public class Withdraw : Controller
         if (config == default) throw new Exception("Invalid withdraw config");
 
         // Check config limits
-        var remaining = config.GetRemainingUsage() ?? 0;
+        var remaining = config.Remaining ?? 0;
         if (payAmount > remaining || remaining == 0)
         {
             throw new Exception("Quota exhausted");

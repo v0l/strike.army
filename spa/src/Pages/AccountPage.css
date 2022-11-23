@@ -56,4 +56,11 @@
     border: 1px solid;
     border-radius: 20px;
     background-color: #222;
+    width: 300px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.qr-info code {
+    word-break: break-all;
 }

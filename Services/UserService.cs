@@ -27,6 +27,7 @@ public class UserService
     {
         return _db.Users
             .Include(a => a.WithdrawConfigs)
+            .ThenInclude(a => a.Payments)
             .SingleOrDefaultAsync(a => a.Id == id);
     }
 
