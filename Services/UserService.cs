@@ -84,6 +84,13 @@ public class UserService
             .SingleOrDefaultAsync(a => a.Id == id);
     }
 
+    public async Task DeleteWithdrawConfig(Guid id)
+    {
+        var cfg = await _db.WithdrawConfigs.SingleAsync(a => a.Id == id);
+        _db.WithdrawConfigs.Remove(cfg);
+        await _db.SaveChangesAsync();
+    }
+
     public Task AddPayment(WithdrawConfigPayment payment)
     {
         _db.WithdrawConfigPayments.Add(payment);

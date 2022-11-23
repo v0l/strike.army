@@ -36,6 +36,15 @@ export default function AccountPage() {
         );
     }
 
+    async function deleteConfig(cfg) {
+        if (window.confirm(`Are you sure you want to delete config: ${cfg.id}`)) {
+            await fetch(`/user/withdraw-config/${cfg.id}`, {
+                method: "DELETE"
+            });
+            await tryLoadAccount();
+        }
+    }
+
     function renderWithdrawConfig(cfg) {
         let usage = 1 - cfg.remaining / (cfg.type === "SingleUse" ? cfg.max : cfg.configReusable.limit);
         return <tr key={cfg.id}>
@@ -44,7 +53,7 @@ export default function AccountPage() {
             <td>{(usage * 100).toFixed(0)}%</td>
             <td>
                 <div className="btn btn-small" onClick={() => setShowConfigQr(cfg)}>QR</div>
-                <div className="btn btn-small">Delete</div>
+                <div className="btn btn-small" onClick={() => deleteConfig(cfg)}>Delete</div>
             </td>
         </tr>
     }

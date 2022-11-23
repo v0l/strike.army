@@ -56,6 +56,19 @@ public class UserController : Controller
         });
     }
 
+    [HttpDelete("withdraw-config/{id:guid}")]
+    public async Task<IActionResult> DeleteConfig([FromRoute] Guid id)
+    {
+        var user = await GetCurrentUser();
+        if (user == default) return Unauthorized();
+
+        var config = await _userService.GetWithdrawConfig(id);
+        if (config == default) return NotFound();
+
+        await _userService.DeleteWithdrawConfig(id);
+        return Ok();
+    }
+
     private async Task<User?> GetCurrentUser()
     {
         var uid = Request.HttpContext.GetUserId();
