@@ -16,6 +16,7 @@ public class StrikeArmyContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<AuthToken> AuthTokens => Set<AuthToken>();
     public DbSet<WithdrawConfig> WithdrawConfigs => Set<WithdrawConfig>();
+    public DbSet<WithdrawConfigPayment> WithdrawConfigPayments => Set<WithdrawConfigPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

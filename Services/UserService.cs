@@ -12,12 +12,15 @@ public class UserService
     private readonly ILogger<UserService> _logger;
     private readonly StrikeApiSettings _strikeApiSettings;
     private readonly StrikeArmyContext _db;
+    private readonly StrikeAuthService _authService;
 
-    public UserService(StrikeArmyContext db, StrikeApiSettings strikeApiSettings, ILogger<UserService> logger)
+    public UserService(StrikeArmyContext db, StrikeApiSettings strikeApiSettings, ILogger<UserService> logger,
+        StrikeAuthService authService)
     {
         _db = db;
         _strikeApiSettings = strikeApiSettings;
         _logger = logger;
+        _authService = authService;
     }
 
     public Task<User?> GetUser(Guid id)
@@ -31,7 +34,7 @@ public class UserService
     {
         var tokens = await _db.AuthTokens
             .AsNoTracking()
-            .Where(a => a.UserId == user.Id && DateTime.UtcNow < a.Expires)
+            .Where(a => a.UserId == user.Id)
             .ToArrayAsync();
 
         if (!tokens.Any()) return default;
@@ -39,10 +42,62 @@ public class UserService
         var latestToken = tokens.MaxBy(a => a.Expires);
         if (latestToken!.Expires < DateTime.UtcNow)
         {
-            _logger.LogWarning("token expired");
+            var newToken = await _authService.RefreshToken(latestToken.RefreshToken);
+            if (newToken == default)
+            {
+                _logger.LogError("Failed to refresh token");
+                return default;
+            }
+
+            var e = _db.AuthTokens.Add(new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                AccessToken = newToken!.AccessToken,
+                RefreshToken = newToken.RefreshToken,
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddSeconds(newToken.ExpiresIn)
+            });
+
+            await _db.SaveChangesAsync();
+            latestToken = e.Entity;
         }
 
-        return new(_strikeApiSettings, tokens.MaxBy(a => a.Expires)!.AccessToken);
+        return new(_strikeApiSettings, latestToken.AccessToken);
+    }
+
+    public async Task<WithdrawConfig> AddConfig(WithdrawConfig cfg)
+    {
+        var e = _db.WithdrawConfigs.Add(cfg);
+        await _db.SaveChangesAsync();
+        return e.Entity;
+    }
+
+    public async Task<WithdrawConfig?> GetWithdrawConfig(Guid id)
+    {
+        return await _db.WithdrawConfigs
+            .AsNoTracking()
+            .Include(a => a.User)
+            .Include(a => a.ConfigReusable)
+            .Include(a => a.Payments)
+            .SingleOrDefaultAsync(a => a.Id == id);
+    }
+
+    public Task AddPayment(WithdrawConfigPayment payment)
+    {
+        _db.WithdrawConfigPayments.Add(payment);
+        return _db.SaveChangesAsync();
+    }
+
+    public async Task UpdatePaymentStatus(Guid id, PaymentStatus status, ulong? routingFee, string? statusMessage = null)
+    {
+        var entity = await _db.WithdrawConfigPayments
+            .SingleAsync(a => a.Id == id);
+
+        entity.RoutingFee = routingFee;
+        entity.Status = status;
+        entity.StatusMessage = statusMessage;
+        await _db.SaveChangesAsync();
     }
 
     public async Task<User> CreateUserFromToken(OAuthService.OAuthAccessToken token)

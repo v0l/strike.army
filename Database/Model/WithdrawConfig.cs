@@ -10,4 +10,18 @@ public class WithdrawConfig
     public ulong? Min { get; init; }
     
     public ulong? Max { get; init; }
+    
+    public WithdrawConfigType Type { get; init; }
+
+    public string Description { get; init; } = null!;
+
+    public WithdrawConfigReusable? ConfigReusable { get; init; }
+
+    public List<WithdrawConfigPayment> Payments { get; init; } = new();
+}
+
+public enum WithdrawConfigType
+{
+    SingleUse,
+    Reusable
 }

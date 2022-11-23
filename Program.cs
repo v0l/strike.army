@@ -16,6 +16,7 @@ public static class Program
     {
         settings.NullValueHandling = NullValueHandling.Ignore;
         settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+        settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
         settings.Converters = new JsonConverter[]
         {
             new StringEnumConverter()

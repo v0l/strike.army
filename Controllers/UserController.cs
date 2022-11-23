@@ -33,6 +33,29 @@ public class UserController : Controller
         return new(user, profile!, balance!);
     }
 
+    [HttpPost("withdraw-config")]
+    public async Task<WithdrawConfig?> AddWithdrawConfig([FromBody] NewWithdrawConfig cfg)
+    {
+        var user = await GetCurrentUser();
+        if (user == default) return default;
+
+        var k1 = Guid.NewGuid();
+        return await _userService.AddConfig(new()
+        {
+            Id = k1,
+            UserId = user.Id,
+            Description = cfg.Description,
+            Min = cfg.Min == 0 ? null : cfg.Min,
+            Max = cfg.Max,
+            Type = cfg.Type,
+            ConfigReusable = cfg.Type is WithdrawConfigType.Reusable ? new WithdrawConfigReusable
+            {
+                Interval = cfg.Interval!.Value,
+                Limit = cfg.Limit!.Value
+            } : null
+        });
+    }
+
     private async Task<User?> GetCurrentUser()
     {
         var uid = Request.HttpContext.GetUserId();
@@ -42,4 +65,14 @@ public class UserController : Controller
     }
 
     public record UserProfile(User User, Profile Profile, List<Balance> Balances);
+
+    public class NewWithdrawConfig
+    {
+        public WithdrawConfigType Type { get; init; }
+        public string Description { get; init; }
+        public ulong Min { get; init; }
+        public ulong Max { get; init; }
+        public WithdrawConfigLimitInterval? Interval { get; init; }
+        public ulong? Limit { get; init; }
+    }
 }

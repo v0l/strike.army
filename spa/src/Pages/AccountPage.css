@@ -34,6 +34,26 @@
     border-collapse: collapse;
 }
 
+.account-page table th {
+    text-align: start;
+}
+
 .account-page table tr {
+    line-height: 1.5em;
+}
+
+.account-page table tr:hover {
+    background-color: #333 !important;
+}
+
+.account-page table tr:nth-child(2n+1) {
+    background-color: #222;
+}
+
+.qr-info {
+    margin-top: 10vh;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 20px;
     background-color: #222;
 }

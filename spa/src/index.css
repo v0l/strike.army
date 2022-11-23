@@ -26,10 +26,17 @@ a {
     font-weight: bold;
     user-select: none;
     cursor: pointer;
+    background-color: #000;
+    text-transform: uppercase;
 }
 
 .btn:hover {
     background-color: #222;
+}
+
+.btn-small {
+    padding: 2px 10px;
+    font-size: small;
 }
 
 input[type="text"], input[type="number"], select {

@@ -1,0 +1,28 @@
+.new-config {
+    margin-top: 10vh;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 20px;
+    background-color: #222;
+    width: 350px;
+}
+
+.new-config .notes{
+    font-size: small;
+}
+
+.new-config .input {
+    display: flex;
+    flex-direction: column;
+    line-height: 2em;
+}
+
+.new-config .input > label {
+    margin-top: 5px;
+}
+
+.new-config .input > div:last-child {
+    margin-top: 20px;
+    text-align: center;
+    border-radius: 20px;
+}

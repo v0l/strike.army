@@ -1,0 +1,15 @@
+.modal-bg {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.modal-bg .modal {
+    min-width: 200px;
+    min-height: 200px;
+}

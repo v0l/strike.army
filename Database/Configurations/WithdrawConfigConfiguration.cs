@@ -25,5 +25,11 @@ public class WithdrawConfigConfiguration : IEntityTypeConfiguration<WithdrawConf
 
         builder.Property(a => a.Max)
             .IsRequired(false);
+
+        builder.Property(a => a.Type)
+            .IsRequired();
+
+        builder.OwnsOne(a => a.ConfigReusable)
+            .HasOne(a => a.WithdrawConfig);
     }
 }
