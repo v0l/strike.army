@@ -65,6 +65,9 @@ public class UserController : Controller
         var config = await _userService.GetWithdrawConfig(id);
         if (config == default) return NotFound();
 
+        // check user owns this config
+        if (config.UserId != user.Id) return Unauthorized();
+
         await _userService.DeleteWithdrawConfig(id);
         return Ok();
     }
