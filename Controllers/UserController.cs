@@ -30,7 +30,8 @@ public class UserController : Controller
 
         var profile = await _profileCache.GetProfile(user.StrikeUserId);
         var balance = await api.GetBalances();
-        return new(user, profile!, balance!);
+        var min = await _profileCache.GetMinAmount(profile);
+        return new(user, profile!, balance!, min);
     }
 
     [HttpPost("withdraw-config")]
@@ -46,7 +47,7 @@ public class UserController : Controller
             UserId = user.Id,
             Description = cfg.Description,
             Min = cfg.Min == 0 ? null : cfg.Min,
-            Max = cfg.Max,
+            Max = cfg.Max == 0 ? null : cfg.Max,
             Type = cfg.Type,
             ConfigReusable = cfg.Type is WithdrawConfigType.Reusable ? new WithdrawConfigReusable
             {
@@ -80,7 +81,7 @@ public class UserController : Controller
         return await _userService.GetUser(uid.Value);
     }
 
-    public record UserProfile(User User, Profile Profile, List<Balance> Balances);
+    public record UserProfile(User User, Profile Profile, List<Balance> Balances, long? MinPayment);
 
     public class NewWithdrawConfig
     {

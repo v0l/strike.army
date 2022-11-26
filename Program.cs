@@ -50,7 +50,10 @@ public static class Program
         services.AddHealthChecks();
 
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie();
+            .AddCookie(o =>
+            {
+                o.LoginPath = "/auth";
+            });
         services.AddAuthorization();
         
         var app = builder.Build();

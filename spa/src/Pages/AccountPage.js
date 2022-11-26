@@ -2,7 +2,7 @@ import "./AccountPage.css";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import StrikeModal from "../Components/StrikeModal";
-import NewWithdrawConfig from "../Components/WithdrawConfigInput";
+import NewWithdrawConfig from "../Components/NewWithdrawConfig";
 import StrikeArmyQR from "../Components/StrikeArmyQR";
 import {bech32} from "bech32";
 
@@ -31,7 +31,7 @@ export default function AccountPage() {
                 <NewWithdrawConfig close={async () => {
                     await tryLoadAccount();
                     setShowModal(false);
-                }}/>
+                }} minPayment={account?.minPayment}/>
             </StrikeModal>
         );
     }

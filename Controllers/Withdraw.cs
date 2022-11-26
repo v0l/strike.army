@@ -38,7 +38,7 @@ public class Withdraw : Controller
             var profile = await LoadProfile(config.User.StrikeUserId);
 
             var minAmount = config.Min ?? (ulong)await _profileExtension.GetMinAmount(profile);
-            var maxAmount = Math.Min(config.Max ?? 0, remaining);
+            var maxAmount = Math.Min(config.Max ?? 0, remaining ?? 0);
             var svc = new LNURLWithdrawRequest
             {
                 Tag = "withdrawRequest",
@@ -162,14 +162,14 @@ public class Withdraw : Controller
         return id;
     }
 
-    private async Task<(WithdrawConfig Config, ulong Remaingin)> LoadConfig(Guid configId, ulong payAmount = 0)
+    private async Task<(WithdrawConfig Config, ulong? Remaining)> LoadConfig(Guid configId, ulong payAmount = 0)
     {
         // Load config
         var config = await _userService.GetWithdrawConfig(configId);
         if (config == default) throw new Exception("Invalid withdraw config");
 
         // Check config limits
-        var remaining = config.Remaining ?? 0;
+        var remaining = config.Remaining;
         if (payAmount > remaining || remaining == 0)
         {
             throw new Exception("Quota exhausted");

@@ -32,11 +32,15 @@ public class AuthController : Controller
         var strikeToken = await _authService.GetToken(state, code);
         var user = await _userService.CreateUserFromToken(strikeToken!);
 
+        var expire = DateTime.UtcNow.AddDays(7);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-            _userService.CreateLoginPrincipal(user, DateTime.UtcNow.AddDays(7)));
+            _userService.CreateLoginPrincipal(user, expire), new AuthenticationProperties
+            {
+                AllowRefresh = true,
+                ExpiresUtc = expire,
+                IsPersistent = true
+            });
 
         return Redirect("/account");
     }
-
-
 }

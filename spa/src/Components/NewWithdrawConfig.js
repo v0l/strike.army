@@ -80,10 +80,10 @@ export default function NewWithdrawConfig(props) {
                 <label htmlFor="desc">Description</label>
                 <input type="text" id="desc" value={description} onChange={e => setDescription(e.target.value)}/>
                 <label htmlFor="min">Minimum</label>
-                <input type="number" id="min" placeholder="0" value={min}
+                <input type="number" id="min" min={0} placeholder="0" value={min}
                        onChange={e => setMin(parseInt(e.target.value))}/>
                 <label htmlFor="max">Maximum</label>
-                <input type="number" id="max" placeholder="1000" value={max}
+                <input type="number" id="max" min={0} placeholder="1000" value={max}
                        onChange={e => setMax(parseInt(e.target.value))}/>
                 {renderReusable()}
                 <div className="btn" onClick={addConfig}>Add</div>

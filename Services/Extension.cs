@@ -23,14 +23,12 @@ public static class Extension
         {
             WithdrawConfigLimitInterval.Daily => DateTime.UtcNow.AddDays(-1),
             WithdrawConfigLimitInterval.Weekly => DateTime.UtcNow.AddDays(-7),
-            _ => default
+            _ => throw new Exception("Invalid interval")
         };
-
-        if (window == default) return null;
 
         var used = config.Payments
             .Where(a => a.Created > window &&
-                        (a.Status == PaymentStatus.Paid || a.Status == PaymentStatus.Pending))
+                        a.Status is PaymentStatus.Paid or PaymentStatus.Pending)
             .Sum(a => (long)a.Amount + (long)(a.RoutingFee ?? 0));
 
         var limit = config.ConfigReusable!.Limit;
