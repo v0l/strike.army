@@ -1,10 +1,17 @@
 .account-page {
     width: 1024px;
-    padding: 20px;
     border-radius: 20px;
     margin-left: auto;
     margin-right: auto;
     border: 1px solid;
+    overflow: hidden;
+}
+
+@media(max-width: 1024px) {
+    .account-page { 
+        border: initial;
+        width: 100vw;
+    }
 }
 
 .account-page .balance {
@@ -15,7 +22,7 @@
     font-size: 20px;
     line-height: 1.4em;
     margin-bottom: 10px;
-    width: 200px;
+    width: 250px;
 }
 
 .account-page .balance > div {
@@ -24,7 +31,7 @@
 }
 
 .account-page .balance > div:first-child {
-    width: 50px;
+    width: 60px;
     font-weight: bold;
     background-color: #222;
 }

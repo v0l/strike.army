@@ -1,6 +1,5 @@
 .home-page {
     width: 720px;
-    padding: 20px;
     border-radius: 20px;
     margin-left: auto;
     margin-right: auto;
@@ -13,4 +12,25 @@
 
 .home-page h3.error {
     color: red;
+}
+
+.home-page .qr-input {
+    text-align: center;
+    margin-bottom: 10px; 
+}
+
+@media (max-width: 720px) {
+    .home-page {
+        width: 100vw;
+        border-radius: 0;
+        border: 0;
+    }
+
+    .home-page .qr-input {
+        flex-direction: column;
+    }
+    
+    .home-page .qr-input > div {
+        margin-bottom: 10px;
+    }
 }

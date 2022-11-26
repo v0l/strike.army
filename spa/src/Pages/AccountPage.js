@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom";
 import StrikeModal from "../Components/StrikeModal";
 import NewWithdrawConfig from "../Components/NewWithdrawConfig";
 import StrikeArmyQR from "../Components/StrikeArmyQR";
-import {bech32} from "bech32";
+import {lnurlPay, lnurlWithdraw} from "../Util";
 
 export default function AccountPage() {
     const navigate = useNavigate();
@@ -48,7 +48,7 @@ export default function AccountPage() {
     function renderWithdrawConfig(cfg) {
         let usage = 1 - cfg.remaining / (cfg.type === "SingleUse" ? cfg.max : cfg.configReusable.limit);
         return <tr key={cfg.id}>
-            <td>{cfg.id}</td>
+            <td>{cfg.description.substring(0, 50)}</td>
             <td>{cfg.type}</td>
             <td>{(usage * 100).toFixed(0)}%</td>
             <td>
@@ -61,11 +61,7 @@ export default function AccountPage() {
     function renderWithdrawConfigQr() {
         if (showConfigQr === null) return null;
 
-        let link = `https://${window.location.host}/withdraw/${showConfigQr.id}`;
-
-        let words = new TextEncoder().encode(link);
-        let lnurl = bech32.encode("lnurl", bech32.toWords(words), 10_000).toUpperCase();
-
+        let lnurl = lnurlWithdraw(showConfigQr.id);
         return (
             <StrikeModal close={() => setShowConfigQr(null)}>
                 <div className="qr-info" onClick={e => e.stopPropagation()}>
@@ -86,33 +82,43 @@ export default function AccountPage() {
     return (
         <>
             <div className="account-page">
-                <h1>Welcome back, {account.profile.handle}!</h1>
-                <h2>Balances</h2>
-                {account.balances.map(b =>
-                    <div className="balance" key={b.currency}>
-                        <div>{b.currency}</div>
+                <div className="m20">
+                    <h1>Welcome back, {account.profile.handle}!</h1>
+                    <div className="flex">
                         <div>
-                            {b.available.toLocaleString("en-US", {
-                                maximumFractionDigits: 8
-                            })}
+                            <h2>Balances:</h2>
+                            {account.balances.map(b =>
+                                <div className="balance" key={b.currency}>
+                                    <div>{b.currency}</div>
+                                    <div>
+                                        {b.available.toLocaleString("en-US", {
+                                            maximumFractionDigits: 8
+                                        })}
+                                    </div>
+                                </div>)}
                         </div>
-                    </div>)}
-                <h2>Withdraw Configs</h2>
-                <div className="btn" onClick={_ => setShowModal(true)}>+Add</div>
-                <br/><br/>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Type</th>
-                        <th>Usage</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {account.user.withdrawConfigs.map(a => renderWithdrawConfig(a))}
-                    </tbody>
-                </table>
+                        <div className="mob-hide">
+                            <h2>Receive QR</h2>
+                            <StrikeArmyQR link={lnurlPay(account.profile.handle)}></StrikeArmyQR>
+                        </div>
+                    </div>
+                    <h2>Withdraw Configs:</h2>
+                    <div className="btn" onClick={_ => setShowModal(true)}>+Add</div>
+                    <br/><br/>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Usage</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {account.user.withdrawConfigs.map(a => renderWithdrawConfig(a))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {renderModal()}
             {renderWithdrawConfigQr()}

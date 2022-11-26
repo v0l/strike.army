@@ -53,5 +53,28 @@ input[type="checkbox"] {
 
 .flex {
     display: flex;
+}
+
+.flex-grow {
+    flex-grow: 1 !important;
+    flex-shrink: initial !important;
+    flex-basis: initial !important;
+}
+
+.flex-align-center {
     align-items: center;
+}
+
+.flex > div {
+    flex: 1;
+}
+
+.m20 {
+    margin: 20px;
+}
+
+@media (max-width: 1024px) {
+    .mob-hide {
+        display: none;
+    }
 }
