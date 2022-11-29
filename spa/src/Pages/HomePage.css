@@ -4,6 +4,7 @@
     margin-left: auto;
     margin-right: auto;
     border: 1px solid;
+    overflow: hidden;
 }
 
 .home-page h1 {
@@ -17,6 +18,10 @@
 .home-page .qr-input {
     text-align: center;
     margin-bottom: 10px; 
+}
+
+.home-page code {
+    word-break: break-all;
 }
 
 @media (max-width: 720px) {

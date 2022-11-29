@@ -13,7 +13,7 @@ namespace StrikeArmy.Controllers;
 [Route($"{PathBase}/{{user}}")]
 public class PayController : Controller
 {
-    public const string PathBase = "pay";
+    public const string PathBase = "p";
 
     private readonly ILogger<PayController> _logger;
     private readonly StrikeApi.StrikeApi _api;
@@ -36,7 +36,7 @@ public class PayController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPayService([FromRoute] string user, [FromQuery] string? description)
+    public async Task<IActionResult> GetPayService([FromRoute] string user, [FromQuery] string? d)
     {
         var baseUrl = _config.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
         var id = Guid.NewGuid();
@@ -48,7 +48,7 @@ public class PayController : Controller
 
         var metadata = new List<string?[]>()
         {
-            new[] {"text/plain", description ?? $"Pay to Strike user: {user}"},
+            new[] {"text/plain", d ?? $"Pay to Strike user: {user}"},
             new[] {"text/identifier", $"{user}@{baseUrl.Host}"}
         };
 

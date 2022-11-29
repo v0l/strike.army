@@ -44,6 +44,7 @@ input[type="text"], input[type="number"], select {
     border-radius: 10px;
     font-size: 16px;
     border: 0;
+    width: 90%;
 }
 
 input[type="checkbox"] {
@@ -71,6 +72,10 @@ input[type="checkbox"] {
 
 .m20 {
     margin: 20px;
+}
+
+.mb10 { 
+    margin-bottom: 10px;
 }
 
 @media (max-width: 1024px) {

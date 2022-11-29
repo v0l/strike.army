@@ -12,7 +12,7 @@ namespace StrikeArmy.Controllers;
 [Route(WithdrawBase)]
 public class Withdraw : Controller
 {
-    private const string WithdrawBase = "withdraw";
+    private const string WithdrawBase = "w";
     private readonly StrikeArmyConfig _config;
     private readonly IMemoryCache _cache;
     private readonly ProfileCache _profileExtension;
@@ -47,7 +47,7 @@ public class Withdraw : Controller
                 MaxWithdrawable = LightMoney.Satoshis(maxAmount),
                 K1 = oneTimeSecret.ToString(),
                 DefaultDescription = config.Description,
-                PayLink = new(baseUrl, $"/pay/{profile.Handle}")
+                PayLink = new(baseUrl, $"/{PayController.PathBase}/{profile.Handle}")
             };
 
             _cache.Set(oneTimeSecret, id, TimeSpan.FromMinutes(5));

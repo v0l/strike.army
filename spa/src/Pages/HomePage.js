@@ -5,6 +5,7 @@ import {lnurlPay} from "../Util";
 
 export default function HomePage() {
     const [username, setUsername] = useState("");
+    const [description, setDescription] = useState("");
     const [link, setLink] = useState("");
     const [lightningAddress, setLightningAddress] = useState("");
     const [tipPage, setTipPage] = useState("");
@@ -32,8 +33,9 @@ export default function HomePage() {
             setError("No profile found");
             return;
         }
+        setError("");
 
-        setLink(lnurlPay(username));
+        setLink(lnurlPay(username, description));
         setLightningAddress(`${username}@${window.location.host}`);
         setProfile(profile);
         setTipPage(`/${username}`);
@@ -64,15 +66,19 @@ export default function HomePage() {
                             <input type="text" placeholder="Strike username" value={username}
                                    onChange={e => setUsername(e.target.value)}/>
                         </div>
-                        <div className="btn" onClick={_ => updateQrLink()}>Generate</div>
+                        <div className="flex-grow">
+                            <input type="text" placeholder="Description" value={description}
+                                   onChange={e => setDescription(e.target.value)}/>
+                        </div>
                         <div className="flex flex-align-center">
                             <div>
                                 <input type="checkbox" checked={withAvatar}
                                        onChange={e => setWithAvatar(e.target.checked)}/>
                             </div>
-                            <div className="flex-grow">With Avatar</div>
+                            <div className="flex-grow">Avatar</div>
                         </div>
                     </div>
+                    <div className="btn mb10" onClick={_ => updateQrLink()}>Generate</div>
                     {link.length > 0 ?
                         <>
                             <StrikeArmyQR link={link} avatar={avatar}/>

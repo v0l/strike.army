@@ -1,11 +1,12 @@
 import {bech32} from "bech32";
 
-export function lnurlPay(username) {
-    return lnurlEncode(`https://${window.location.host}/pay/${username}`);
+export function lnurlPay(username, description) {
+    let addDesc = description && description.length > 0 ? `?d=${encodeURIComponent(description)}` : "";
+    return lnurlEncode(`https://${window.location.host}/p/${username}${addDesc}`);
 }
 
 export function lnurlWithdraw(id) {
-    return lnurlEncode(`https://${window.location.host}/withdraw/${id}`);
+    return lnurlEncode(`https://${window.location.host}/w/${id}`);
 }
 
 function lnurlEncode(link) {
