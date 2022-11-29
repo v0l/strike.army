@@ -78,3 +78,7 @@ input[type="checkbox"] {
         display: none;
     }
 }
+
+.qr > canvas {
+    border-radius: 20px;
+}

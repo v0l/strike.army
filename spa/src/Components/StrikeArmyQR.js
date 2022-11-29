@@ -37,6 +37,6 @@ export default function StrikeArmyQR(props) {
     }, [props.link]);
 
     return (
-        <div ref={qrRef}></div>
+        <div className="qr" ref={qrRef}></div>
     );
 }

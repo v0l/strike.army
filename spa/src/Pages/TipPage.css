@@ -1,0 +1,14 @@
+.tip-page {
+    display: flex;
+    margin-top: 10vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.tip-widget {
+    min-width: 300px;
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+}

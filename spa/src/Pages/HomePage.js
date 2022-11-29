@@ -7,6 +7,7 @@ export default function HomePage() {
     const [username, setUsername] = useState("");
     const [link, setLink] = useState("");
     const [lightningAddress, setLightningAddress] = useState("");
+    const [tipPage, setTipPage] = useState("");
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState("");
     const [withAvatar, setWithAvatar] = useState(true);
@@ -35,6 +36,7 @@ export default function HomePage() {
         setLink(lnurlPay(username));
         setLightningAddress(`${username}@${window.location.host}`);
         setProfile(profile);
+        setTipPage(`/${username}`);
     }
 
     let avatar = profile?.avatarUrl?.length > 0 && withAvatar ? `/profile/${username}/avatar` : null;
@@ -80,7 +82,7 @@ export default function HomePage() {
                                 <dt>Lightning Address:</dt>
                                 <dd><a href={`lightning:${lightningAddress}`}>{lightningAddress}</a></dd>
                                 <dt>Tip Page:</dt>
-                                <dd><a target="_blank" href={`https://strike.me/${username}`}>{username}</a></dd>
+                                <dd><a target="_blank" href={tipPage}>{username}</a></dd>
                             </dl>
                         </> : null}
                     {error.length > 0 ? <h3 className="error">{error}</h3> : null}
