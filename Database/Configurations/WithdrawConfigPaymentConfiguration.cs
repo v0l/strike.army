@@ -35,10 +35,6 @@ public class WithdrawConfigPaymentConfiguration : IEntityTypeConfiguration<Withd
         builder.Property(a => a.StatusMessage)
             .IsRequired(false);
 
-        builder.HasOne(a => a.WithdrawConfig)
-            .WithMany(a => a.Payments)
-            .HasForeignKey(a => a.WithdrawConfigId);
-
         builder.HasIndex(a => new {a.Created, a.Status});
     }
 }

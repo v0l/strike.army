@@ -19,7 +19,7 @@ public class WithdrawConfigConfiguration : IEntityTypeConfiguration<WithdrawConf
         builder.HasOne(a => a.User)
             .WithMany(a => a.WithdrawConfigs)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         builder.Property(a => a.Min)
             .IsRequired(false);
 
@@ -29,7 +29,11 @@ public class WithdrawConfigConfiguration : IEntityTypeConfiguration<WithdrawConf
         builder.Property(a => a.Type)
             .IsRequired();
 
-        builder.OwnsOne(a => a.ConfigReusable)
-            .HasOne(a => a.WithdrawConfig);
+        builder.HasMany(a => a.Payments)
+            .WithOne()
+            .HasForeignKey(a => a.WithdrawConfigId);
+
+        builder.OwnsOne(a => a.ConfigReusable);
+        builder.OwnsOne(a => a.BoltCardConfig);
     }
 }

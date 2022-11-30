@@ -49,11 +49,12 @@ public class UserController : Controller
             Min = cfg.Min == 0 ? null : cfg.Min,
             Max = cfg.Max == 0 ? null : cfg.Max,
             Type = cfg.Type,
-            ConfigReusable = cfg.Type is WithdrawConfigType.Reusable ? new WithdrawConfigReusable
+            ConfigReusable = cfg.Type is WithdrawConfigType.Reusable ? new()
             {
                 Interval = cfg.Interval!.Value,
                 Limit = cfg.Limit!.Value
-            } : null
+            } : null,
+            BoltCardConfig = cfg.BoltCard ? new() : null
         });
     }
 
@@ -91,5 +92,6 @@ public class UserController : Controller
         public ulong Max { get; init; }
         public WithdrawConfigLimitInterval? Interval { get; init; }
         public ulong? Limit { get; init; }
+        public bool BoltCard { get; init; }
     }
 }

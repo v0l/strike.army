@@ -9,6 +9,10 @@ export function lnurlWithdraw(id) {
     return lnurlEncode(`https://${window.location.host}/w/${id}`);
 }
 
+export function lnurlWithdrawUri(id) {
+    return `lnurlw://${window.location.host}/w/${id}`;
+}
+
 function lnurlEncode(link) {
     let words = new TextEncoder().encode(link);
     return bech32.encode("lnurl", bech32.toWords(words), 10_000).toUpperCase();

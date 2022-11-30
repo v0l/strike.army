@@ -3,7 +3,7 @@ import {useEffect, useRef} from "react";
 
 export default function StrikeArmyQR(props) {
     const qrRef = useRef();
-
+    
     useEffect(() => {
         if (props.link) {
             let qr = new QRCodeStyling({
@@ -13,9 +13,6 @@ export default function StrikeArmyQR(props) {
                 margin: 5,
                 type: 'canvas',
                 image: props.avatar,
-                qrOptions: {
-                    mode: "Alphanumeric"
-                },
                 dotsOptions: {
                     type: 'rounded'
                 },

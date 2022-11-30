@@ -19,7 +19,8 @@ export default function NewWithdrawConfig(props) {
     const [max, setMax] = useState(500_000);
     const [interval, setInterval] = useState(0);
     const [limit, setLimit] = useState(1_000_000);
-
+    const [boltCard, setBoltCard] = useState(false);
+    
     async function addConfig() {
         let newConfig = {
             type,
@@ -27,7 +28,8 @@ export default function NewWithdrawConfig(props) {
             min,
             max,
             interval: null,
-            limit: null
+            limit: null,
+            boltCard
         };
         if (type === ConfigType.Reusable) {
             newConfig.interval = interval;
@@ -86,6 +88,8 @@ export default function NewWithdrawConfig(props) {
                 <input type="number" id="max" min={0} placeholder="1000" value={max}
                        onChange={e => setMax(parseInt(e.target.value))}/>
                 {renderReusable()}
+                <label htmlFor="bolt-card">Bolt Card</label>
+                <input type="checkbox" id="bolt-card" value={boltCard} onChange={e => setBoltCard(e.target.checked)}/>
                 <div className="btn" onClick={addConfig}>Add</div>
             </div>
         </div>

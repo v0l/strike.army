@@ -1,0 +1,13 @@
+.qr-info {
+    margin-top: 10vh;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 20px;
+    background-color: #222;
+    text-align: center;
+}
+
+.qr-info code {
+    word-break: break-all;
+    user-select: all;
+}

@@ -4,7 +4,8 @@ import {useNavigate} from "react-router-dom";
 import StrikeModal from "../Components/StrikeModal";
 import NewWithdrawConfig from "../Components/NewWithdrawConfig";
 import StrikeArmyQR from "../Components/StrikeArmyQR";
-import {lnurlPay, lnurlWithdraw} from "../Util";
+import {lnurlPay} from "../Util";
+import WithdrawConfigInfo from "../Components/WithdrawConfigInfo";
 
 export default function AccountPage() {
     const navigate = useNavigate();
@@ -61,14 +62,9 @@ export default function AccountPage() {
     function renderWithdrawConfigQr() {
         if (showConfigQr === null) return null;
 
-        let lnurl = lnurlWithdraw(showConfigQr.id);
         return (
             <StrikeModal close={() => setShowConfigQr(null)}>
-                <div className="qr-info" onClick={e => e.stopPropagation()}>
-                    <StrikeArmyQR link={lnurl}/>
-                    <h3>LNURL Code</h3>
-                    <code>{lnurl}</code>
-                </div>
+                <WithdrawConfigInfo config={showConfigQr}/>
             </StrikeModal>
         );
     }

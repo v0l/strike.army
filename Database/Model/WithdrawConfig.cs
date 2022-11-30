@@ -20,6 +20,8 @@ public class WithdrawConfig
     public WithdrawConfigReusable? ConfigReusable { get; init; }
 
     public List<WithdrawConfigPayment> Payments { get; init; } = new();
+    
+    public BoltCardConfig? BoltCardConfig { get; init; }
 
     public ulong? Remaining => this.GetRemainingUsage();
 }

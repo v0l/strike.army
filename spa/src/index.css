@@ -78,6 +78,10 @@ input[type="checkbox"] {
     margin-bottom: 10px;
 }
 
+.ml10 {
+    margin-left: 10px;
+}
+
 @media (max-width: 1024px) {
     .mob-hide {
         display: none;

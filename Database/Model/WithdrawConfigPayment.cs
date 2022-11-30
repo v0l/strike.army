@@ -5,7 +5,6 @@ public class WithdrawConfigPayment
     public Guid Id { get; init; } = Guid.NewGuid();
 
     public Guid WithdrawConfigId { get; init; }
-    public WithdrawConfig WithdrawConfig { get; init; } = null!;
 
     public Guid StrikeQuoteId { get; init; }
 

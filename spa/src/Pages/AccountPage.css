@@ -56,18 +56,3 @@
 .account-page table tr:nth-child(2n+1) {
     background-color: #222;
 }
-
-.qr-info {
-    margin-top: 10vh;
-    padding: 20px;
-    border: 1px solid;
-    border-radius: 20px;
-    background-color: #222;
-    width: 300px;
-    overflow: hidden;
-    text-align: center;
-}
-
-.qr-info code {
-    word-break: break-all;
-}
