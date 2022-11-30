@@ -50,12 +50,16 @@ public static class Program
         services.AddHealthChecks();
 
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(o =>
-            {
-                o.LoginPath = "/auth";
-            });
+            .AddCookie(o => { o.LoginPath = "/auth"; });
+
         services.AddAuthorization();
-        
+
+        if (config.Plausible != null)
+        {
+            services.AddTransient<PlausibleAnalytics>();
+            services.AddTransient<AnalyticsMiddleware>();
+        }
+
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
@@ -63,11 +67,18 @@ public static class Program
             var db = scope.ServiceProvider.GetRequiredService<StrikeArmyContext>();
             await db.Database.MigrateAsync();
         }
-        
+
         app.UseStaticFiles();
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseHealthChecks("/healthz");
+
+        if (config.Plausible != null)
+        {
+            app.UseMiddleware<AnalyticsMiddleware>();
+        }
+
         app.UseEndpoints(ep =>
         {
             ep.Map("/.well-known/lnurlp/{username}", ctx =>

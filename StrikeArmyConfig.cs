@@ -8,5 +8,11 @@ public class StrikeArmyConfig
 
     public StrikeApiSettings Strike { get; init; } = null!;
 
-    public Guid Secret { get; init; } = Guid.NewGuid();
+    public PlausibleSettings? Plausible { get; init; }
+}
+
+public sealed class PlausibleSettings
+{
+    public Uri Endpoint { get; init; } = null!;
+    public string Domain { get; init; } = null!;
 }
