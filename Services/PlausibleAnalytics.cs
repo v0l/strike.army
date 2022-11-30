@@ -23,8 +23,7 @@ public class PlausibleAnalytics
         request.Headers.Add("x-forwarded-for",
             context.Request.Headers.TryGetValue("x-forwarded-for", out var xff) ? xff.First() : null);
 
-        var ub = new UriBuilder("http:", context.Request.Host.Host, context.Request.Host.Port ?? 80,
-            context.Request.Path)
+        var ub = new UriBuilder("http:", context.Request.Host.Host, context.Request.Host.Port ?? 80, context.Request.Path)
         {
             Query = context.Request.QueryString.Value
         };
@@ -36,14 +35,16 @@ public class PlausibleAnalytics
                     ? new Uri(context.Request.Headers.Referer.FirstOrDefault()!)
                     : null
         };
-        request.Content = new ByteArrayContent(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ev)));
+
+        var json = JsonConvert.SerializeObject(ev);
+        request.Content = new ByteArrayContent(Encoding.UTF8.GetBytes(json));
         request.Content.Headers.ContentType = new("application/json");
 
         var rsp = await _client.SendAsync(request);
         if (!rsp.IsSuccessStatusCode)
         {
             throw new Exception(
-                $"Invalid plausible analytics response {rsp.StatusCode} {await rsp.Content.ReadAsStringAsync()}");
+                $"Invalid plausible analytics response {rsp.StatusCode} {await rsp.Content.ReadAsStringAsync()} {json}");
         }
     }
 
@@ -55,16 +56,22 @@ public class PlausibleAnalytics
             Url = url;
         }
 
-        [JsonProperty("name")] public string Name { get; init; } = "pageview";
+        [JsonProperty("name")]
+        public string Name { get; init; } = "pageview";
 
-        [JsonProperty("domain")] public string Domain { get; init; }
+        [JsonProperty("domain")]
+        public string Domain { get; init; }
 
-        [JsonProperty("url")] public Uri Url { get; init; }
+        [JsonProperty("url")]
+        public Uri Url { get; init; }
 
-        [JsonProperty("screen_width")] public int? ScreenWidth { get; init; }
+        [JsonProperty("screen_width")]
+        public int? ScreenWidth { get; init; }
 
-        [JsonProperty("referrer")] public Uri? Referrer { get; init; }
+        [JsonProperty("referrer")]
+        public Uri? Referrer { get; init; }
 
-        [JsonProperty("props")] public object? Props { get; init; }
+        [JsonProperty("props")]
+        public object? Props { get; init; }
     }
 }
