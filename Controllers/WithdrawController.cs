@@ -9,16 +9,16 @@ using StrikeArmy.StrikeApi;
 
 namespace StrikeArmy.Controllers;
 
-[Route(WithdrawBase)]
-public class Withdraw : Controller
+[Route(PathBase)]
+public class WithdrawController : Controller
 {
-    private const string WithdrawBase = "w";
+    public const string PathBase = "w";
     private readonly StrikeArmyConfig _config;
     private readonly IMemoryCache _cache;
     private readonly ProfileCache _profileExtension;
     private readonly UserService _userService;
 
-    public Withdraw(StrikeArmyConfig config, IMemoryCache cache, ProfileCache profileExtension,
+    public WithdrawController(StrikeArmyConfig config, IMemoryCache cache, ProfileCache profileExtension,
         UserService userService)
     {
         _config = config;
@@ -42,7 +42,7 @@ public class Withdraw : Controller
             var svc = new LNURLWithdrawRequest
             {
                 Tag = "withdrawRequest",
-                Callback = new(baseUrl, $"/{WithdrawBase}/execute"),
+                Callback = new(baseUrl, $"/{PathBase}/execute"),
                 MinWithdrawable = LightMoney.Satoshis(minAmount),
                 MaxWithdrawable = LightMoney.Satoshis(maxAmount),
                 K1 = oneTimeSecret.ToString(),

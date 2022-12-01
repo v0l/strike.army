@@ -74,6 +74,16 @@ public class UserService
         return e.Entity;
     }
 
+    public async Task<WithdrawConfig?> GetWithdrawConfigByBoltSetupKey(Guid id)
+    {
+        return await _db.WithdrawConfigs
+            .AsNoTracking()
+            .Include(a => a.User)
+            .Include(a => a.ConfigReusable)
+            .Include(a => a.Payments)
+            .SingleOrDefaultAsync(a => a.BoltCardConfig != default && a.BoltCardConfig.SetupKey == id);
+    }
+    
     public async Task<WithdrawConfig?> GetWithdrawConfig(Guid id)
     {
         return await _db.WithdrawConfigs
@@ -88,6 +98,20 @@ public class UserService
     {
         var cfg = await _db.WithdrawConfigs.SingleAsync(a => a.Id == id);
         _db.WithdrawConfigs.Remove(cfg);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task SetBoltSetupKey(Guid id, Guid setupKey)
+    {
+        var cfg = await _db.WithdrawConfigs.SingleAsync(a => a.Id == id);
+        cfg.BoltCardConfig!.SetupKey = setupKey;
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task WipeBoltSetupKey(Guid id)
+    {
+        var cfg = await _db.WithdrawConfigs.SingleAsync(a => a.Id == id);
+        cfg.BoltCardConfig!.SetupKey = default;
         await _db.SaveChangesAsync();
     }
 
