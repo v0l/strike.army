@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using StrikeArmy.ApiModels;
 using StrikeArmy.Database.Model;
 using StrikeArmy.Services;
 using StrikeArmy.StrikeApi;
@@ -118,11 +119,11 @@ public class UserController : Controller
         {
             BaseUrl = ub.Uri,
             CardName = config.Id.ToString(),
-            K0 = config.BoltCardConfig.K0.ToString().Replace("-", string.Empty),
-            K1 = config.BoltCardConfig.K1.ToString().Replace("-", string.Empty),
-            K2 = config.BoltCardConfig.K2.ToString().Replace("-", string.Empty),
-            K3 = config.BoltCardConfig.K3.ToString().Replace("-", string.Empty),
-            K4 = config.BoltCardConfig.K4.ToString().Replace("-", string.Empty)
+            K0 = config.BoltCardConfig.K0.ToHex(),
+            K1 = config.BoltCardConfig.K1.ToHex(),
+            K2 = config.BoltCardConfig.K2.ToHex(),
+            K3 = config.BoltCardConfig.K3.ToHex(),
+            K4 = config.BoltCardConfig.K4.ToHex()
         };
 
         await _userService.WipeBoltSetupKey(config.Id);
@@ -136,48 +137,5 @@ public class UserController : Controller
         if (!uid.HasValue) return default;
 
         return await _userService.GetUser(uid.Value);
-    }
-
-    public record UserProfile(User User, Profile Profile, List<Balance> Balances, long? MinPayment);
-
-    public class NewWithdrawConfig
-    {
-        public WithdrawConfigType Type { get; init; }
-        public string Description { get; init; }
-        public ulong Min { get; init; }
-        public ulong Max { get; init; }
-        public WithdrawConfigLimitInterval? Interval { get; init; }
-        public ulong? Limit { get; init; }
-        public bool BoltCard { get; init; }
-    }
-
-    public class BoltCardSetup
-    {
-        [JsonProperty("protocol_name")]
-        public string ProtocolName { get; init; } = "create_bolt_card_response";
-
-        [JsonProperty("protocol_version")]
-        public int ProtocolVersion { get; init; } = 1;
-
-        [JsonProperty("card_name")]
-        public string CardName { get; init; } = null!;
-
-        [JsonProperty("lnurlw_base")]
-        public Uri BaseUrl { get; init; } = null!;
-
-        [JsonProperty("k0")]
-        public string K0 { get; init; } = null!;
-
-        [JsonProperty("k1")]
-        public string K1 { get; init; } = null!;
-
-        [JsonProperty("k2")]
-        public string K2 { get; init; } = null!;
-
-        [JsonProperty("k3")]
-        public string K3 { get; init; } = null!;
-
-        [JsonProperty("k4")]
-        public string K4 { get; init; } = null!;
     }
 }

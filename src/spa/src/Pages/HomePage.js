@@ -53,6 +53,7 @@ export default function HomePage() {
                         <li>LNURL-Pay</li>
                         <li>Lightning Address</li>
                         <li>LNURL-Withdraw</li>
+                        <li>BoltCard Support!</li>
                     </ul>
 
                     <div className="btn" onClick={() => window.location.href = "/auth"}>

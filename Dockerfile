@@ -5,11 +5,11 @@ WORKDIR /app
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
 
-COPY spa/package.json spa/yarn.lock spa/
+COPY src/spa/package.json src/spa/yarn.lock spa/
 RUN cd spa && npx yarn install
 
 # Copy everything else and build
-COPY . .
+COPY src .
 RUN rm -rf appsettings.*.json
 RUN dotnet publish -c Release -o out strike.army.csproj
 

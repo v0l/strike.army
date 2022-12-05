@@ -7,6 +7,6 @@ public class BoltCardConfig
     public Guid K2 { get; init; } = Guid.NewGuid();
     public Guid K3 { get; init; } = Guid.NewGuid();
     public Guid K4 { get; init; } = Guid.NewGuid();
-    public uint Counter { get; init; } = 0;
+    public uint Counter { get; set; } = 0;
     public Guid? SetupKey { get; set; } = Guid.NewGuid();
 }

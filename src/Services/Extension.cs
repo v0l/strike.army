@@ -34,4 +34,19 @@ public static class Extension
         var limit = config.ConfigReusable!.Limit;
         return Math.Max(0, limit - (ulong)used);
     }
+
+    public static string ToHex(this Guid g)
+    {
+        return g.ToByteArray().ToHex();
+    }
+
+    public static Guid ToGuid(this string hex)
+    {
+        return new(Convert.FromHexString(hex));
+    }
+
+    public static string ToHex(this byte[] data)
+    {
+        return BitConverter.ToString(data).Replace("-", string.Empty).ToLower();
+    }
 }

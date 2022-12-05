@@ -1,3 +1,5 @@
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
 using BTCPayServer.Lightning;
 using LNURL;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using NBitcoin;
 using StrikeArmy.Database.Model;
 using StrikeArmy.Services;
 using StrikeArmy.StrikeApi;
+using Aes = System.Security.Cryptography.Aes;
 
 namespace StrikeArmy.Controllers;
 
@@ -28,7 +31,7 @@ public class WithdrawController : Controller
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetService([FromRoute] Guid id)
+    public async Task<IActionResult> GetService([FromRoute] Guid id, [FromQuery] string? p = null, [FromQuery] string? c = null)
     {
         var oneTimeSecret = Guid.NewGuid();
         var baseUrl = _config.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
@@ -36,6 +39,12 @@ public class WithdrawController : Controller
         {
             var (config, remaining) = await LoadConfig(id);
             var profile = await LoadProfile(config.User.StrikeUserId);
+
+            if (config.BoltCardConfig != default)
+            {
+                var ctr = BoltCard.CheckBoltCard(config.BoltCardConfig!, p!, c!);
+                await _userService.UpdateBoltCounter(config.Id, ctr);
+            }
 
             var minAmount = config.Min ?? (ulong)await _profileExtension.GetMinAmount(profile);
             var maxAmount = Math.Min(config.Max ?? 0, remaining ?? 0);
