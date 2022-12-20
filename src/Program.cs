@@ -85,7 +85,8 @@ public static class Program
             {
                 if (ctx.Request.RouteValues.TryGetValue("username", out var username))
                 {
-                    ctx.Response.Redirect($"/{PayController.PathBase}/{username as string}", true);
+                    var lnAddress = $"{username}@{config.BaseUrl?.Host ?? ctx.Request.Host.Value}";
+                    ctx.Response.Redirect($"/{PayController.PathBase}/{username as string}?d={Uri.EscapeDataString(lnAddress)}", true);
                 }
 
                 return Task.CompletedTask;
