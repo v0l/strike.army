@@ -39,6 +39,7 @@ public static class Program
         services.AddControllers();
         services.AddHttpClient();
         services.AddMemoryCache();
+        services.AddCors();
 
         services.AddStrikeApi();
         services.AddTransient<UserService>();
@@ -70,6 +71,12 @@ public static class Program
 
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCors(o =>
+        {
+            o.AllowAnyOrigin();
+            o.AllowAnyMethod();
+            o.AllowAnyHeader();
+        });
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseHealthChecks("/healthz");
