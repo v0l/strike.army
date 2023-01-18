@@ -1,14 +1,25 @@
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text;
 using BTCPayServer.Lightning;
 using LNURL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using NNostr.Client;
+using StrikeArmy.Services;
 using StrikeArmy.StrikeApi;
+using SHA256 = System.Security.Cryptography.SHA256;
 
 namespace StrikeArmy.Controllers;
+
+public class LNURLPayRequestExtended : LNURLPayRequest
+{
+    [JsonProperty("nostrPubkey")]
+    public string NostrPubkey { get; set; }
+
+    [JsonProperty("allowsNostr")]
+    public bool AllowsNostr { get; set; }
+}
 
 [Route($"{PathBase}/{{user}}")]
 public class PayController : Controller
@@ -57,7 +68,7 @@ public class PayController : Controller
             metadata.Add(new[] {"image/png;base64", avatar});
         }
 
-        var req = new LNURLPayRequest()
+        var req = new LNURLPayRequestExtended()
         {
             Callback = new Uri(baseUrl, $"{PathBase}/{user}/{id}"),
             MaxSendable = LightMoney.Satoshis(10_000_000),
@@ -67,6 +78,16 @@ public class PayController : Controller
             Tag = "payRequest"
         };
 
+        if (_config.Nostr != default)
+        {
+            var pubkey = _config.Nostr.GetHexPubKey();
+            if (pubkey != default)
+            {
+                req.NostrPubkey = pubkey;
+                req.AllowsNostr = true;
+            }
+        }
+
         _cache.Set(id, req, TimeSpan.FromMinutes(10));
         return Json(req);
     }
@@ -74,7 +95,8 @@ public class PayController : Controller
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetInvoice([FromRoute] string user, [FromRoute] Guid id,
         [FromQuery] long amount,
-        [FromQuery] string? comment = null)
+        [FromQuery] string? comment = null,
+        [FromQuery] string? nostr = null)
     {
         try
         {
@@ -84,7 +106,7 @@ public class PayController : Controller
                 throw new InvalidOperationException("Account cannot receive!");
             }
 
-            var invoiceRequest = _cache.Get<LNURLPayRequest>(id);
+            var invoiceRequest = _cache.Get<LNURLPayRequestExtended>(id);
             if (invoiceRequest == default)
             {
                 throw new InvalidOperationException($"Cannot find request for invoice {id}");
@@ -95,9 +117,9 @@ public class PayController : Controller
                 throw new InvalidOperationException("Amount is out of bounds");
             }
 
-            var metadata = JsonConvert.DeserializeObject<List<string[]>>(invoiceRequest.Metadata);
+            var metadata = JsonConvert.DeserializeObject<List<string[]>>(invoiceRequest.Metadata) ?? new List<string[]>();
             // extract description from metadata
-            var description = metadata?.FirstOrDefault(a =>
+            var description = metadata.FirstOrDefault(a =>
                 a.Length == 2 && a[0].Equals("text/plain", StringComparison.InvariantCultureIgnoreCase))?[1];
 
             var invoice = await _api.GenerateInvoice(new()
@@ -115,13 +137,54 @@ public class PayController : Controller
 
             if (invoice == null) throw new Exception("Failed to get invoice!");
 
-            var descriptionHashData = SHA256.HashData(Encoding.UTF8.GetBytes(invoiceRequest.Metadata));
-            var hexDescriptionHash = BitConverter.ToString(descriptionHashData).Replace("-", string.Empty).ToLower();
+            var isNostr = invoiceRequest.AllowsNostr && !string.IsNullOrEmpty(nostr);
+            string hexDescriptionHash;
+            if (isNostr)
+            {
+                var parsedNote = System.Text.Json.JsonSerializer.Deserialize<NostrEvent>(nostr);
+                if (parsedNote?.Kind != 9734)
+                {
+                    throw new InvalidOperationException("Invalid zap note, kind must be 9734");
+                }
+
+                if (!parsedNote.Verify())
+                {
+                    throw new InvalidOperationException("Zap note sig check failed");
+                }
+
+                metadata.Add(new[] {"application/nostr", nostr});
+                var img = metadata.FirstOrDefault(a => a[0] == "image/png;base64");
+                if (img != default)
+                {
+                    metadata.Remove(img);
+                }
+
+                var newMetadata = JsonConvert.SerializeObject(metadata);
+                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(newMetadata));
+                hexDescriptionHash = Extension.ToHex(hash);
+                invoiceRequest.Metadata = newMetadata;
+            }
+            else
+            {
+                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(invoiceRequest.Metadata));
+                hexDescriptionHash = Extension.ToHex(hash);
+            }
+
             var quote = await _api.GetInvoiceQuote(invoice.InvoiceId, hexDescriptionHash);
             var rsp = new LNURLPayRequest.LNURLPayRequestCallbackResponse()
             {
                 Pr = quote!.LnInvoice
             };
+
+            if (isNostr)
+            {
+                var zap = new ZapNote()
+                {
+                    Request = invoiceRequest,
+                    Invoice = quote.LnInvoice!
+                };
+                _cache.Set(invoice.InvoiceId, zap, TimeSpan.FromMinutes(10));
+            }
 
             return Json(rsp);
         }

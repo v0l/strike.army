@@ -43,6 +43,8 @@ public static class Program
 
         services.AddStrikeApi();
         services.AddTransient<UserService>();
+        services.AddTransient<ZapService>();
+        services.AddHostedService<WebhookSetupService>();
 
         services.AddControllers()
             .AddNewtonsoftJson(o => ConfigureJson(o.SerializerSettings));

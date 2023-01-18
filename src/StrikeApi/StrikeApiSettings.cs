@@ -10,4 +10,6 @@ public class StrikeApiSettings
     public string ClientId { get; init; } = null!;
 
     public Uri AuthEndpoint { get; init; } = new("https://auth.strike.me");
+
+    public string WebhookSecret { get; init; } = Guid.NewGuid().ToString();
 }

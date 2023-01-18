@@ -73,6 +73,21 @@ public class StrikeApi
         return SendRequest<ExecutePayInvoiceResponse>(HttpMethod.Patch, $"/v1/payment-quotes/{id}/execute");
     }
 
+    public Task<IEnumerable<WebhookSubscription>?> GetWebhookSubscriptions()
+    {
+        return SendRequest<IEnumerable<WebhookSubscription>>(HttpMethod.Get, "/v1/subscriptions");
+    }
+
+    public Task<WebhookSubscription?> CreateWebhook(NewWebhook hook)
+    {
+        return SendRequest<WebhookSubscription>(HttpMethod.Post, "/v1/subscriptions", hook);
+    }
+
+    public Task DeleteWebhook(Guid id)
+    {
+        return SendRequest<object>(HttpMethod.Delete, $"/v1/subscriptions/{id}");
+    }
+    
     private async Task<TReturn?> SendRequest<TReturn>(HttpMethod method, string path, object? bodyObj = default)
         where TReturn : class
     {
