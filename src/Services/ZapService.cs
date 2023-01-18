@@ -13,6 +13,7 @@ public class ZapService
     private readonly StrikeArmyConfig _config;
     private readonly IMemoryCache _cache;
     private readonly StrikeApi.StrikeApi _api;
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
     public ZapService(ILogger<ZapService> logger, StrikeArmyConfig config, IMemoryCache cache, StrikeApi.StrikeApi api)
     {
@@ -24,92 +25,103 @@ public class ZapService
 
     public async Task HandleInvoiceStatus(Guid id)
     {
-        var req = _cache.Get<ZapNote>(id);
-        if (req == default) return;
-
-        _cache.Remove(id);
-
-        var invoice = await _api.GetInvoice(id);
-        if (invoice == default)
+        await _lock.WaitAsync();
+        try
         {
-            _logger.LogWarning("No invoice found {id}", id);
-            return;
-        }
+            var req = _cache.Get<ZapNote>(id);
+            if (req == default) return;
 
-        var metadata = JsonConvert.DeserializeObject<List<string[]>>(req.Request.Metadata);
-        if (metadata == default)
-        {
-            _logger.LogWarning("Could not parse {metadata}", req.Request.Metadata);
-            return;
-        }
-
-        var zapNoteContent = metadata.FirstOrDefault(a => a[0] == "application/nostr")?[1];
-        if (string.IsNullOrEmpty(zapNoteContent))
-        {
-            _logger.LogWarning("No nostr note found in {metadata}", req.Request.Metadata);
-            return;
-        }
-
-        var zapNote = JsonSerializer.Deserialize<NostrEvent>(zapNoteContent);
-        if (zapNote == default)
-        {
-            _logger.LogWarning("Could not parse zap note {note}", zapNoteContent);
-            return;
-        }
-
-        var pubkey = _config.Nostr?.GetHexPubKey();
-        if (invoice.State == InvoiceState.PAID && pubkey != default)
-        {
-            var tags = zapNote.Tags.Where(a => a.TagIdentifier is "e" or "p").ToList();
-            tags.Add(new()
+            var invoice = await _api.GetInvoice(id);
+            if (invoice == default)
             {
-                TagIdentifier = "bolt11",
-                Data = new() {req.Invoice}
-            });
+                _logger.LogWarning("No invoice found {id}", id);
+                return;
+            }
 
-            tags.Add(new()
+            var metadata = JsonConvert.DeserializeObject<List<string[]>>(req.Request.Metadata);
+            if (metadata == default)
             {
-                TagIdentifier = "description",
-                Data = new() {req.Request.Metadata}
-            });
+                _logger.LogWarning("Could not parse {metadata}", req.Request.Metadata);
+                return;
+            }
 
-            tags.Add(new()
+            var zapNoteContent = metadata.FirstOrDefault(a => a[0] == "application/nostr")?[1];
+            if (string.IsNullOrEmpty(zapNoteContent))
             {
-                TagIdentifier = "preimage",
-                Data = new() {""}
-            });
+                _logger.LogWarning("No nostr note found in {metadata}", req.Request.Metadata);
+                return;
+            }
 
-            var zapReceipt = new NostrEvent()
+            var zapNote = JsonSerializer.Deserialize<NostrEvent>(zapNoteContent);
+            if (zapNote == default)
             {
-                Kind = 9735,
-                CreatedAt = DateTimeOffset.UtcNow,
-                PublicKey = pubkey,
-                Content = zapNote.Content,
-                Tags = tags
-            };
+                _logger.LogWarning("Could not parse zap note {note}", zapNoteContent);
+                return;
+            }
 
-            await zapReceipt.ComputeIdAndSign(_config.Nostr!.GetPrivateKey()!);
-            var jsonZap = JsonSerializer.Serialize(zapReceipt);
-            _logger.LogInformation("Created tip receipt {json}", jsonZap);
-
-            var taggedRelays = zapNote.Tags.Where(a => a.TagIdentifier == "relays").SelectMany(b => b.Data.Skip(1));
-            foreach (var relay in _config.Nostr!.Relays.Concat(taggedRelays).Distinct())
+            var pubkey = _config.Nostr?.GetHexPubKey();
+            if (invoice.State == InvoiceState.PAID && pubkey != default)
             {
-                try
+                _cache.Remove(id); //remove now to prevent reposted webhooks
+                var tags = zapNote.Tags.Where(a => a.TagIdentifier is "e" or "p").ToList();
+                tags.Add(new()
                 {
-                    using var c = new NostrClient(new Uri(relay));
-                    await c.ConnectAndWaitUntilConnected();
-                    await c.PublishEvent(zapReceipt);
-                    var rsp = c.ListenForRawMessages().GetAsyncEnumerator();
-                    await rsp.MoveNextAsync();
-                    _logger.LogInformation(rsp.Current);
-                    await c.Disconnect();
-                }
-                catch (Exception e)
+                    TagIdentifier = "bolt11",
+                    Data = new() {req.Invoice}
+                });
+
+                tags.Add(new()
                 {
-                    _logger.LogWarning(e, "Failed to send zap receipt");
+                    TagIdentifier = "description",
+                    Data = new() {req.Request.Metadata}
+                });
+
+                tags.Add(new()
+                {
+                    TagIdentifier = "preimage",
+                    Data = new() {""}
+                });
+
+                var zapReceipt = new NostrEvent()
+                {
+                    Kind = 9735,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    PublicKey = pubkey,
+                    Content = zapNote.Content,
+                    Tags = tags
+                };
+
+                await zapReceipt.ComputeIdAndSign(_config.Nostr!.GetPrivateKey()!);
+                var jsonZap = JsonSerializer.Serialize(zapReceipt);
+                _logger.LogInformation("Created tip receipt {json}", jsonZap);
+
+                var taggedRelays = zapNote.Tags.Where(a => a.TagIdentifier == "relays").SelectMany(b => b.Data.Skip(1));
+                foreach (var relay in _config.Nostr!.Relays.Concat(taggedRelays).Distinct())
+                {
+                    try
+                    {
+                        using var c = new NostrClient(new Uri(relay));
+                        await c.ConnectAndWaitUntilConnected();
+                        await c.PublishEvent(zapReceipt);
+                        var rsp = c.ListenForRawMessages().GetAsyncEnumerator();
+                        await rsp.MoveNextAsync();
+                        _logger.LogInformation(rsp.Current);
+                        await c.Disconnect();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning(e, "Failed to send zap receipt");
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to handle zap");
+        }
+        finally
+        {
+            _lock.Release();
         }
     }
 }
