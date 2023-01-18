@@ -27,6 +27,8 @@ public class ZapService
         var req = _cache.Get<ZapNote>(id);
         if (req == default) return;
 
+        _cache.Remove(id);
+
         var invoice = await _api.GetInvoice(id);
         if (invoice == default)
         {
