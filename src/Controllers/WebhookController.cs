@@ -28,15 +28,14 @@ public class WebhookController : Controller
         var json = await sr.ReadToEndAsync();
 
         _logger.LogInformation("Got webhook event: {event}", json);
-        
+
         var key = Encoding.UTF8.GetBytes(_config.Strike.WebhookSecret!);
         var hmac = HMACSHA256.HashData(key, Encoding.UTF8.GetBytes(json));
 
         var hmacCaller = Request.Headers["X-Webhook-Signature"].FirstOrDefault();
 
         var hmacHex = BitConverter.ToString(hmac).Replace("-", "");
-        if ((hmacCaller?.Equals(hmacHex, 
-                StringComparison.InvariantCultureIgnoreCase) ?? false) || true)
+        if (hmacCaller?.Equals(hmacHex, StringComparison.InvariantCultureIgnoreCase) ?? false)
         {
             _logger.LogInformation("HMAC verify success!");
 

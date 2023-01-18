@@ -56,7 +56,7 @@ public class ZapService
         }
 
         var pubkey = _config.Nostr?.GetHexPubKey();
-        if ((invoice.State == InvoiceState.PAID || true) && pubkey != default)
+        if (invoice.State == InvoiceState.PAID && pubkey != default)
         {
             var tags = zapNote.Tags.Where(a => a.TagIdentifier is "e" or "p").ToList();
             tags.Add(new()
