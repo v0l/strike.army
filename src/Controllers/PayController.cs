@@ -117,10 +117,10 @@ public class PayController : Controller
                 throw new InvalidOperationException("Amount is out of bounds");
             }
 
-            var metadata = JsonConvert.DeserializeObject<List<string[]>>(invoiceRequest.Metadata) ?? new List<string[]>();
+            var metadata = JsonConvert.DeserializeObject<List<object[]>>(invoiceRequest.Metadata) ?? new List<object[]>();
             // extract description from metadata
-            var description = metadata.FirstOrDefault(a =>
-                a.Length == 2 && a[0].Equals("text/plain", StringComparison.InvariantCultureIgnoreCase))?[1];
+            var description = (string?)metadata.FirstOrDefault(a =>
+                a.Length == 2 && a[0] is string && ((string)a[0]).Equals("text/plain", StringComparison.InvariantCultureIgnoreCase))?[1];
 
             var invoice = await _api.GenerateInvoice(new()
             {
@@ -141,7 +141,7 @@ public class PayController : Controller
             string hexDescriptionHash;
             if (isNostr)
             {
-                var parsedNote = System.Text.Json.JsonSerializer.Deserialize<NostrEvent>(nostr);
+                var parsedNote = System.Text.Json.JsonSerializer.Deserialize<NostrEvent>(nostr!);
                 if (parsedNote?.Kind != 9734)
                 {
                     throw new InvalidOperationException("Invalid zap note, kind must be 9734");
@@ -152,17 +152,9 @@ public class PayController : Controller
                     throw new InvalidOperationException("Zap note sig check failed");
                 }
 
-                metadata.Add(new[] {"application/nostr", nostr});
-                var img = metadata.FirstOrDefault(a => a[0] == "image/png;base64");
-                if (img != default)
-                {
-                    metadata.Remove(img);
-                }
-
-                var newMetadata = JsonConvert.SerializeObject(metadata);
-                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(newMetadata));
+                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(nostr!));
                 hexDescriptionHash = Extension.ToHex(hash);
-                invoiceRequest.Metadata = newMetadata;
+                invoiceRequest.Metadata = nostr;
             }
             else
             {

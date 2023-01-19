@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 using NNostr.Client;
 using StrikeArmy.Controllers;
 using StrikeArmy.StrikeApi;
@@ -38,24 +37,10 @@ public class ZapService
                 return;
             }
 
-            var metadata = JsonConvert.DeserializeObject<List<string[]>>(req.Request.Metadata);
-            if (metadata == default)
-            {
-                _logger.LogWarning("Could not parse {metadata}", req.Request.Metadata);
-                return;
-            }
-
-            var zapNoteContent = metadata.FirstOrDefault(a => a[0] == "application/nostr")?[1];
-            if (string.IsNullOrEmpty(zapNoteContent))
-            {
-                _logger.LogWarning("No nostr note found in {metadata}", req.Request.Metadata);
-                return;
-            }
-
-            var zapNote = JsonSerializer.Deserialize<NostrEvent>(zapNoteContent);
+            var zapNote = JsonSerializer.Deserialize<NostrEvent>(req.Request.Metadata);
             if (zapNote == default)
             {
-                _logger.LogWarning("Could not parse zap note {note}", zapNoteContent);
+                _logger.LogWarning("Could not parse zap note {note}", req.Request.Metadata);
                 return;
             }
 
