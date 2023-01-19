@@ -47,7 +47,6 @@ public class ZapService
             var pubkey = _config.Nostr?.GetHexPubKey();
             if (invoice.State == InvoiceState.PAID && pubkey != default)
             {
-                _cache.Remove(id); //remove now to prevent reposted webhooks
                 var tags = zapNote.Tags.Where(a => a.TagIdentifier is "e" or "p").ToList();
                 tags.Add(new()
                 {
@@ -59,12 +58,6 @@ public class ZapService
                 {
                     TagIdentifier = "description",
                     Data = new() {req.Request.Metadata}
-                });
-
-                tags.Add(new()
-                {
-                    TagIdentifier = "preimage",
-                    Data = new() {""}
                 });
 
                 var zapReceipt = new NostrEvent()
@@ -98,6 +91,7 @@ public class ZapService
                         _logger.LogWarning(e, "Failed to send zap receipt");
                     }
                 }
+                _cache.Remove(id);
             }
         }
         catch (Exception e)
