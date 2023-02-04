@@ -12,7 +12,7 @@ public class ZapService
     private readonly StrikeArmyConfig _config;
     private readonly IMemoryCache _cache;
     private readonly StrikeApi.StrikeApi _api;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private static readonly SemaphoreSlim Lock = new(1, 1);
 
     public ZapService(ILogger<ZapService> logger, StrikeArmyConfig config, IMemoryCache cache, StrikeApi.StrikeApi api)
     {
@@ -24,7 +24,7 @@ public class ZapService
 
     public async Task HandleInvoiceStatus(Guid id)
     {
-        await _lock.WaitAsync();
+        await Lock.WaitAsync();
         try
         {
             var req = _cache.Get<ZapNote>(id);
@@ -100,7 +100,7 @@ public class ZapService
         }
         finally
         {
-            _lock.Release();
+            Lock.Release();
         }
     }
 }
