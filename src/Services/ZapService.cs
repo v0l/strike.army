@@ -74,23 +74,27 @@ public class ZapService
                 _logger.LogInformation("Created tip receipt {json}", jsonZap);
 
                 var taggedRelays = zapNote.Tags.Where(a => a.TagIdentifier == "relays").SelectMany(b => b.Data.Skip(1));
-                foreach (var relay in _config.Nostr!.Relays.Concat(taggedRelays).Distinct())
+                await Task.WhenAll(_config.Nostr!.Relays.Concat(taggedRelays).Distinct().Select(async relay =>
                 {
                     try
                     {
+                        var cts = new CancellationTokenSource();
+                        cts.CancelAfter(TimeSpan.FromSeconds(30));
+                        
                         using var c = new NostrClient(new Uri(relay));
-                        await c.ConnectAndWaitUntilConnected();
-                        await c.PublishEvent(zapReceipt);
-                        var rsp = c.ListenForRawMessages().GetAsyncEnumerator();
+                        await c.ConnectAndWaitUntilConnected(cts.Token);
+                        await c.PublishEvent(zapReceipt, cts.Token);
+                        var rsp = c.ListenForRawMessages().GetAsyncEnumerator(cts.Token);
                         await rsp.MoveNextAsync();
-                        _logger.LogInformation(rsp.Current);
+                        _logger.LogInformation("[{relay}] Response: {message}", relay, rsp.Current);
                         await c.Disconnect();
                     }
                     catch (Exception e)
                     {
-                        _logger.LogWarning(e, "Failed to send zap receipt");
+                        _logger.LogWarning("[{relay}] Failed to send zap receipt {message}", relay, e.Message);
                     }
-                }
+                }));
+
                 _cache.Remove(id);
             }
         }

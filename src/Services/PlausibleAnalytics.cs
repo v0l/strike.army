@@ -19,7 +19,7 @@ public class PlausibleAnalytics
     public async Task TrackPageView(HttpContext context)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "/api/event");
-        request.Headers.Add("user-agent", context.Request.Headers.UserAgent.First());
+        request.Headers.Add("user-agent", context.Request.Headers.UserAgent.FirstOrDefault());
         request.Headers.Add("x-forwarded-for",
             context.Request.Headers.TryGetValue("x-forwarded-for", out var xff) ? xff.First() : null);
 
