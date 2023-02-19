@@ -47,7 +47,7 @@ public class ZapService
             var pubkey = _config.Nostr?.GetHexPubKey();
             if (invoice.State == InvoiceState.PAID && pubkey != default)
             {
-                var tags = zapNote.Tags.Where(a => a.TagIdentifier is "e" or "p").ToList();
+                var tags = zapNote.Tags.Where(a => a.TagIdentifier.Length == 1).ToList();
                 tags.Add(new()
                 {
                     TagIdentifier = "bolt11",
