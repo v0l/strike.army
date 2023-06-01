@@ -49,6 +49,8 @@ public class PayController : Controller
     [HttpGet]
     public async Task<IActionResult> GetPayService([FromRoute] string user, [FromQuery] string? d)
     {
+        return Redirect($"https://strike.me/.well-known/lnurlp/{user}");
+        
         var baseUrl = _config.BaseUrl ?? new Uri($"{Request.Scheme}://{Request.Host}");
         var id = Guid.NewGuid();
 
